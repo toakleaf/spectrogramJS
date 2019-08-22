@@ -102,61 +102,78 @@ var _utils2 = _interopRequireDefault(_utils);
 
 var _objects = __webpack_require__(/*! ./objects */ "./src/js/objects.js");
 
+var _processAudio = __webpack_require__(/*! ./processAudio */ "./src/js/processAudio.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var canvas = document.querySelector('canvas');
 var ctx = canvas.getContext('2d');
 
+// Audio
+var actx = new AudioContext();
+navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+  return (0, _processAudio.processAudio)(stream);
+}); //get mic input
+var analyser = actx.createAnalyser();
+
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 var mouse = {
-    x: innerWidth / 2,
-    y: innerHeight / 2
+  x: innerWidth / 2,
+  y: innerHeight / 2
 };
 
 var colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66'];
 
 // Event Listeners
 canvas.addEventListener('mousemove', function (event) {
-    mouse.x = event.clientX;
-    mouse.y = event.clientY;
+  mouse.x = event.clientX;
+  mouse.y = event.clientY;
 });
 
 window.addEventListener('resize', function () {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+  canvas.width = innerWidth;
+  canvas.height = innerHeight;
 
-    init();
+  init();
+});
+
+canvas.addEventListener('click', function (event) {
+  if (actx.state === 'suspended') {
+    actx.resume();
+  }
 });
 
 // Implementation
 var shapes = void 0;
 function init() {
-    shapes = [];
+  shapes = [];
 
-    for (var i = 0; i < 400; i++) {
-        var radius = _utils2.default.randomIntFromRange(10, 50);
-        var x = _utils2.default.randomIntFromRange(0 + radius, canvas.width - radius);
-        var y = _utils2.default.randomIntFromRange(0 + radius, canvas.height - radius);
-        shapes.push(new _objects.Shape(ctx, x, y, radius, _utils2.default.randomColor(colors)));
-    }
+  for (var i = 0; i < 400; i++) {
+    var radius = _utils2.default.randomIntFromRange(10, 50);
+    var x = _utils2.default.randomIntFromRange(0 + radius, canvas.width - radius);
+    var y = _utils2.default.randomIntFromRange(0 + radius, canvas.height - radius);
+    shapes.push(new _objects.Shape(ctx, x, y, radius, _utils2.default.randomColor(colors)));
+  }
 }
 
 // Animation Loop
 // let renderTime = Date.now()
 function animate() {
-    // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it, so manual track elapsed time
-    requestAnimationFrame(animate);
-    // let elapsedTime = Date.now() - renderTime
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it, so manual track elapsed time
+  requestAnimationFrame(animate);
+  // let elapsedTime = Date.now() - renderTime
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    shapes.forEach(function (shape) {
-        shape.update();
-    });
+  shapes.forEach(function (shape) {
+    shape.update();
+  });
 
-    ctx.fillStyle = '#000';
-    ctx.fillText('HTML CANVAS BOILERPLATE', mouse.x, mouse.y);
+  if (actx.state === 'suspended') {
+    ctx.fillStyle = '#fff';
+    ctx.fillText('CLICK TO BEGIN', mouse.x, mouse.y);
+  }
 }
 
 init();
@@ -179,36 +196,54 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Shape = function () {
-    function Shape(context, x, y, radius, color) {
-        _classCallCheck(this, Shape);
+  function Shape(context, x, y, radius, color) {
+    _classCallCheck(this, Shape);
 
-        this.ctx = context;
-        this.x = x;
-        this.y = y;
-        this.radius = radius;
-        this.color = color;
+    this.ctx = context;
+    this.x = x;
+    this.y = y;
+    this.radius = radius;
+    this.color = color;
+  }
+
+  _createClass(Shape, [{
+    key: "draw",
+    value: function draw() {
+      this.ctx.beginPath();
+      this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
+      this.ctx.fillStyle = this.color;
+      this.ctx.fill();
+      this.ctx.closePath();
     }
+  }, {
+    key: "update",
+    value: function update() {
+      this.draw();
+    }
+  }]);
 
-    _createClass(Shape, [{
-        key: "draw",
-        value: function draw() {
-            this.ctx.beginPath();
-            this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-            this.ctx.fillStyle = this.color;
-            this.ctx.fill();
-            this.ctx.closePath();
-        }
-    }, {
-        key: "update",
-        value: function update() {
-            this.draw();
-        }
-    }]);
-
-    return Shape;
+  return Shape;
 }();
 
 module.exports = { Shape: Shape };
+
+/***/ }),
+
+/***/ "./src/js/processAudio.js":
+/*!********************************!*\
+  !*** ./src/js/processAudio.js ***!
+  \********************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function processAudio(stream) {
+  console.log(stream);
+}
+
+module.exports = { processAudio: processAudio };
 
 /***/ }),
 
