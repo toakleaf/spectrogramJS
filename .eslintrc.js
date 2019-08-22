@@ -8,7 +8,7 @@ module.exports = {
     sourceType: 'module'
   },
   rules: {
-    indent: ['error', 4],
+    indent: ['error', 2],
     'linebreak-style': ['error', 'unix'],
     quotes: ['error', 'single'],
     semi: ['error', 'never']
