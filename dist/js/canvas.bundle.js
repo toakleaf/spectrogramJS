@@ -102,29 +102,30 @@ var _utils2 = _interopRequireDefault(_utils);
 
 var _objects = __webpack_require__(/*! ./objects */ "./src/js/objects.js");
 
-var _processAudio = __webpack_require__(/*! ./processAudio */ "./src/js/processAudio.js");
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var canvas = document.querySelector('canvas');
 var ctx = canvas.getContext('2d');
 
-// Audio
-var actx = new AudioContext();
-navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
-  return (0, _processAudio.processAudio)(stream);
-}); //get mic input
-var analyser = actx.createAnalyser();
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
 var mouse = {
   x: innerWidth / 2,
   y: innerHeight / 2
 };
-
 var colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66'];
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+// Audio
+var actx = new AudioContext();
+var analyser = actx.createAnalyser();
+actx.fftSize = 256;
+//get mic input
+navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+  var source = actx.createMediaStreamSource(stream);
+  source.connect(analyser);
+});
+var data = new Uint8Array(analyser.frequencyBinCount);
+analyser.getByteFrequencyData(data);
 
 // Event Listeners
 canvas.addEventListener('mousemove', function (event) {
@@ -135,11 +136,11 @@ canvas.addEventListener('mousemove', function (event) {
 window.addEventListener('resize', function () {
   canvas.width = innerWidth;
   canvas.height = innerHeight;
-
   init();
 });
 
 canvas.addEventListener('click', function (event) {
+  // by default audio context will be suspended until user interaction.
   if (actx.state === 'suspended') {
     actx.resume();
   }
@@ -159,16 +160,30 @@ function init() {
 }
 
 // Animation Loop
-// let renderTime = Date.now()
+var refTime = Date.now();
+var elapsedTime = 0;
 function animate() {
   // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it, so manual track elapsed time
   requestAnimationFrame(animate);
-  // let elapsedTime = Date.now() - renderTime
+  elapsedTime = Date.now() - refTime;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  shapes.forEach(function (shape) {
-    shape.update();
-  });
+  // slow down fft to only run every 200 ms
+  if (elapsedTime >= 200) {
+    refTime = Date.now();
+
+    analyser.getByteFrequencyData(data);
+    // console.log(data)
+    data.forEach(function (bin) {
+      // console.log(bin)
+    });
+  }
+
+  // console.log(data)
+  // shapes.forEach(shape => {
+  //   shape.update()
+  // })
 
   if (actx.state === 'suspended') {
     ctx.fillStyle = '#fff';
@@ -226,24 +241,6 @@ var Shape = function () {
 }();
 
 module.exports = { Shape: Shape };
-
-/***/ }),
-
-/***/ "./src/js/processAudio.js":
-/*!********************************!*\
-  !*** ./src/js/processAudio.js ***!
-  \********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function processAudio(stream) {
-  console.log(stream);
-}
-
-module.exports = { processAudio: processAudio };
 
 /***/ }),
 
