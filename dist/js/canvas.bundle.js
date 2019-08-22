@@ -96,13 +96,36 @@
 "use strict";
 
 
-var _utils = __webpack_require__(/*! ./utils */ "./src/js/utils.js");
+var REFRESH_RATE = 100;
+var MIN_FREQ = 80;
+var MAX_FREQ = 16000;
+var FFT_SIZE = 2048; // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
+var NUM_BINS = FFT_SIZE / 2;
+var MIN_LOG = Math.log(MIN_FREQ) / Math.log(10);
+var MAX_LOG = Math.log(MAX_FREQ) / Math.log(10);
+var LOG_RANGE = MAX_LOG - MIN_LOG;
 
-var _utils2 = _interopRequireDefault(_utils);
+function binSize(numBins, sampleRate) {
+  var maxFreq = sampleRate / 2;
+  return maxFreq / numBins;
+}
 
-var _objects = __webpack_require__(/*! ./objects */ "./src/js/objects.js");
+function bucketRange(min, max, numBins, binSize) {
+  var low = Math.floor(min / binSize) - 1;
+  low = low > 0 ? low : 0;
+  var high = Math.floor(max / binSize) - 1;
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+  return {
+    low: low,
+    high: high,
+    range: high - low + 1,
+    binSize: binSize
+  };
+}
+
+function logPosition(freq, minLog, logRange, width) {
+  return (Math.log(freq) / Math.log(10) - minLog) / logRange * width;
+}
 
 var canvas = document.querySelector('canvas');
 var ctx = canvas.getContext('2d');
@@ -110,8 +133,9 @@ var ctx = canvas.getContext('2d');
 var mouse = {
   x: innerWidth / 2,
   y: innerHeight / 2
-  // const colors = ['#2185C5', '#7ECEFD', '#FFF6E5', '#FF7F66']
-};canvas.width = window.innerWidth;
+};
+
+canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 ctx.fillStyle = 'hsl(280, 100%, 10%)';
 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -119,7 +143,8 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 // Audio
 var actx = new AudioContext();
 var analyser = actx.createAnalyser();
-actx.fftSize = 256;
+analyser.fftSize = FFT_SIZE;
+
 //get mic input
 navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
   var source = actx.createMediaStreamSource(stream);
@@ -127,6 +152,7 @@ navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
 });
 var data = new Uint8Array(analyser.frequencyBinCount);
 analyser.getByteFrequencyData(data);
+var dataBuckets = bucketRange(MIN_FREQ, MAX_FREQ, NUM_BINS, binSize(NUM_BINS, actx.sampleRate));
 
 // Event Listeners
 canvas.addEventListener('mousemove', function (event) {
@@ -147,19 +173,6 @@ canvas.addEventListener('click', function (event) {
   }
 });
 
-// Implementation
-// let shapes
-// function init() {
-//   shapes = []
-
-//   for (let i = 0; i < 400; i++) {
-//     const radius = utils.randomIntFromRange(10, 50)
-//     const x = utils.randomIntFromRange(0 + radius, canvas.width - radius)
-//     const y = utils.randomIntFromRange(0 + radius, canvas.height - radius)
-//     shapes.push(new Shape(ctx, x, y, radius, utils.randomColor(colors)))
-//   }
-// }
-
 // Animation Loop
 var refTime = Date.now();
 var elapsedTime = 0;
@@ -167,6 +180,12 @@ var imageData = void 0;
 function animate() {
   // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it, so manual track elapsed time
   requestAnimationFrame(animate);
+
+  // if (actx.state === 'suspended') {
+  //   ctx.clearRect(0, 0, canvas.width, canvas.height)
+  //   ctx.fillStyle = '#fff'
+  //   ctx.fillText('CLICK TO BEGIN', mouse.x, mouse.y)
+  // }
 
   imageData = ctx.getImageData(0, 0, canvas.width, canvas.height - 1);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -176,118 +195,53 @@ function animate() {
   elapsedTime = Date.now() - refTime;
 
   // slow down fft to only run every 200 ms
-  if (elapsedTime >= 100) {
+  if (elapsedTime >= REFRESH_RATE) {
     refTime = Date.now();
 
     analyser.getByteFrequencyData(data);
-    data.forEach(function (amplitude, i) {
-      var rat = amplitude / 255;
+
+    var prevLogPos = 0;
+    for (var i = dataBuckets.low; i <= dataBuckets.high; i++) {
+      // console.log(prevLogPos)
+      var rat = data[i] / 255;
       var hue = Math.round((rat * 120 + 280) % 360);
       var sat = '100%';
       var lit = 10 + 70 * rat;
       ctx.beginPath();
       ctx.strokeStyle = 'hsl(' + hue + ', ' + sat + ', ' + lit + '%)';
-      ctx.moveTo(i * canvas.width / data.length, 0);
-      // ctx.moveTo(x, H - i * h)
-      ctx.lineTo(canvas.width / data.length + i * canvas.width / data.length, 0);
-      // ctx.lineTo(x, H - (i * h + h))
+      ctx.moveTo(prevLogPos, 0);
+      prevLogPos = logPosition(i * dataBuckets.binSize, MIN_LOG, LOG_RANGE, canvas.width);
+      ctx.lineTo(prevLogPos, 0);
       ctx.stroke();
-    });
+      ctx.closePath();
+    }
+
+    // // linear
+    // for (let i = dataBuckets.low; i <= dataBuckets.high; i++) {
+    //   let rat = data[i] / 255
+    //   let hue = Math.round((rat * 120 + 280) % 360)
+    //   let sat = '100%'
+    //   let lit = 10 + 70 * rat
+    //   ctx.beginPath()
+    //   ctx.strokeStyle = `hsl(${hue}, ${sat}, ${lit}%)`
+    //   ctx.moveTo((i * canvas.width) / dataBuckets.range, 0)
+    //   // ctx.moveTo(x, H - i * h)
+    //   ctx.lineTo(
+    //     canvas.width / dataBuckets.range +
+    //       (i * canvas.width) / dataBuckets.range,
+    //     0
+    //   )
+    //   // ctx.lineTo(x, H - (i * h + h))
+    //   ctx.stroke()
+    //   ctx.closePath()
+    // }
   } else {
     var topRow = imageData = ctx.getImageData(0, 1, canvas.width, 2);
     ctx.putImageData(imageData, 0, 0);
   }
-
-  // console.log(data)
-  // shapes.forEach(shape => {
-  //   shape.update()
-  // })
-
-  // if (actx.state === 'suspended') {
-  //   ctx.fillStyle = '#fff'
-  //   ctx.fillText('CLICK TO BEGIN', mouse.x, mouse.y)
-  // }
 }
 
-// init()
 animate();
-
-/***/ }),
-
-/***/ "./src/js/objects.js":
-/*!***************************!*\
-  !*** ./src/js/objects.js ***!
-  \***************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Shape = function () {
-  function Shape(context, x, y, radius, color) {
-    _classCallCheck(this, Shape);
-
-    this.ctx = context;
-    this.x = x;
-    this.y = y;
-    this.radius = radius;
-    this.color = color;
-  }
-
-  _createClass(Shape, [{
-    key: "draw",
-    value: function draw() {
-      this.ctx.beginPath();
-      this.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-      this.ctx.fillStyle = this.color;
-      this.ctx.fill();
-      this.ctx.closePath();
-    }
-  }, {
-    key: "update",
-    value: function update() {
-      this.draw();
-    }
-  }]);
-
-  return Shape;
-}();
-
-module.exports = { Shape: Shape };
-
-/***/ }),
-
-/***/ "./src/js/utils.js":
-/*!*************************!*\
-  !*** ./src/js/utils.js ***!
-  \*************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function randomIntFromRange(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-function randomColor(colors) {
-  return colors[Math.floor(Math.random() * colors.length)];
-}
-
-function distance(x1, y1, x2, y2) {
-  var xDist = x2 - x1;
-  var yDist = y2 - y1;
-
-  return Math.sqrt(Math.pow(xDist, 2) + Math.pow(yDist, 2));
-}
-
-module.exports = { randomIntFromRange: randomIntFromRange, randomColor: randomColor, distance: distance };
 
 /***/ })
 
