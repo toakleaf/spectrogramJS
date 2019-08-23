@@ -2655,7 +2655,7 @@ function getBinInfo(min, max, numBins, binSize) {
 }
 
 function logPosition(freq, minLog, logRange, width) {
-  return (Math.log(freq) / Math.log(10) - minLog) / logRange * width;
+  return Math.floor((Math.log(freq) / Math.log(10) - minLog) / logRange * width);
 }
 
 module.exports = { binSize: binSize, getBinInfo: getBinInfo, logPosition: logPosition };
