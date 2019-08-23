@@ -1,7 +1,8 @@
 const REFRESH_RATE = 100
 const MIN_FREQ = 80
 const MAX_FREQ = 16000
-const FFT_SIZE = 2048 // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
+const FFT_SIZE = 16384 // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
+const SMOOTHING = 0.1 // 0-1
 const NUM_BINS = FFT_SIZE / 2
 const MIN_LOG = Math.log(MIN_FREQ) / Math.log(10)
 const MAX_LOG = Math.log(MAX_FREQ) / Math.log(10)
@@ -46,6 +47,7 @@ ctx.fillRect(0, 0, canvas.width, canvas.height)
 const actx = new AudioContext()
 const analyser = actx.createAnalyser()
 analyser.fftSize = FFT_SIZE
+analyser.smoothingTimeConstant = SMOOTHING
 
 //get mic input
 navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {

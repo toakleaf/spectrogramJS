@@ -99,7 +99,8 @@
 var REFRESH_RATE = 100;
 var MIN_FREQ = 80;
 var MAX_FREQ = 16000;
-var FFT_SIZE = 2048; // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
+var FFT_SIZE = 16384; // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
+var SMOOTHING = 0.1; // 0-1
 var NUM_BINS = FFT_SIZE / 2;
 var MIN_LOG = Math.log(MIN_FREQ) / Math.log(10);
 var MAX_LOG = Math.log(MAX_FREQ) / Math.log(10);
@@ -144,6 +145,7 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 var actx = new AudioContext();
 var analyser = actx.createAnalyser();
 analyser.fftSize = FFT_SIZE;
+analyser.smoothingTimeConstant = SMOOTHING;
 
 //get mic input
 navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
