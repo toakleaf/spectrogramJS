@@ -10,7 +10,7 @@ Not a bad day's work for my first at bat with this API.
 
 1.  Maybe fix the toolbar styling to be a bit more mobile friendly.
 
-2.  Refactor the code to be less procedural in nature.
+2.  Add vertical note line overlays option for easy pitch reference.
 
 ## Getting Started
 
