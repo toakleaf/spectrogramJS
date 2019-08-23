@@ -10,11 +10,13 @@ module.exports = function(canvas, ctx) {
   const ContextConstructor = window.AudioContext || window.webkitAudioContext
   const actx = new ContextConstructor()
   const analyser = actx.createAnalyser()
+
   // Get mic input
   navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
     const source = actx.createMediaStreamSource(stream)
     source.connect(analyser)
   })
+
   // Initialize data array
   let data
   let dataBinRef
@@ -60,22 +62,27 @@ module.exports = function(canvas, ctx) {
       init()
     }
 
-    elapsedTime = Date.now() - refTime
     // Slow down fft refresh rate from default 15-18 ms
     // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it
+    elapsedTime = Date.now() - refTime
     if (elapsedTime >= settings.REFRESH_RATE) {
       refTime = Date.now()
 
+      // Fill up the data array
       analyser.getByteFrequencyData(data)
+
       let prevLogPos = 0
 
+      // Draw data points on canvas
       for (let i = dataBinRef.low; i <= dataBinRef.high; i++) {
         let rat = data[i] / 255
         let hue = Math.round((rat * 120 + 280) % 360)
         let sat = '100%'
         let lit = 10 + 70 * rat
+
         ctx.beginPath()
         ctx.strokeStyle = `hsl(${hue}, ${sat}, ${lit}%)`
+
         // Logarithmic Display
         if (settings.DISPLAY === 'Logarithmic') {
           ctx.moveTo(prevLogPos, 0)
@@ -96,6 +103,7 @@ module.exports = function(canvas, ctx) {
             0
           )
         }
+
         ctx.stroke()
         ctx.closePath()
       }

@@ -2793,11 +2793,13 @@ module.exports = function (canvas, ctx) {
   var ContextConstructor = window.AudioContext || window.webkitAudioContext;
   var actx = new ContextConstructor();
   var analyser = actx.createAnalyser();
+
   // Get mic input
   navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
     var source = actx.createMediaStreamSource(stream);
     source.connect(analyser);
   });
+
   // Initialize data array
   var data = void 0;
   var dataBinRef = void 0;
@@ -2833,22 +2835,27 @@ module.exports = function (canvas, ctx) {
       init();
     }
 
-    elapsedTime = Date.now() - refTime;
     // Slow down fft refresh rate from default 15-18 ms
     // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it
+    elapsedTime = Date.now() - refTime;
     if (elapsedTime >= _settings2.default.REFRESH_RATE) {
       refTime = Date.now();
 
+      // Fill up the data array
       analyser.getByteFrequencyData(data);
+
       var prevLogPos = 0;
 
+      // Draw data points on canvas
       for (var i = dataBinRef.low; i <= dataBinRef.high; i++) {
         var rat = data[i] / 255;
         var hue = Math.round((rat * 120 + 280) % 360);
         var sat = '100%';
         var lit = 10 + 70 * rat;
+
         ctx.beginPath();
         ctx.strokeStyle = 'hsl(' + hue + ', ' + sat + ', ' + lit + '%)';
+
         // Logarithmic Display
         if (_settings2.default.DISPLAY === 'Logarithmic') {
           ctx.moveTo(prevLogPos, 0);
@@ -2860,6 +2867,7 @@ module.exports = function (canvas, ctx) {
             ctx.moveTo(i * canvas.width / dataBinRef.range, 0);
             ctx.lineTo(canvas.width / dataBinRef.range + i * canvas.width / dataBinRef.range, 0);
           }
+
         ctx.stroke();
         ctx.closePath();
       }
