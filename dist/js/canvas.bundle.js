@@ -2637,173 +2637,189 @@ var index = {
 "use strict";
 
 
+var _spectrogram = __webpack_require__(/*! ./spectrogram.js */ "./src/js/spectrogram.js");
+
+var _spectrogram2 = _interopRequireDefault(_spectrogram);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var start = document.querySelector('#start');
+
+start.addEventListener('click', function (event) {
+  start.style.display = 'none';
+  (0, _spectrogram2.default)();
+});
+
+/***/ }),
+
+/***/ "./src/js/spectrogram.js":
+/*!*******************************!*\
+  !*** ./src/js/spectrogram.js ***!
+  \*******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 var _dat = __webpack_require__(/*! dat.gui */ "./node_modules/dat.gui/build/dat.gui.module.js");
 
 var dat = _interopRequireWildcard(_dat);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-var gui = new dat.GUI();
-gui.closed = true;
-
-var SETTINGS = {
-  HEADER_SIZE: 35,
-  REFRESH_RATE: 100,
-  MIN_FREQ: 80,
-  MAX_FREQ: 16000,
-  FFT_SIZE: 16384, // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
-  SMOOTHING: 0.0, // 0.0-1.0
-  DISPLAY: 'Logarithmic',
-  get NUM_BINS() {
-    return this.FFT_SIZE / 2;
-  },
-  get MIN_LOG() {
-    return Math.log(this.MIN_FREQ) / Math.log(10);
-  },
-  get LOG_RANGE() {
-    return Math.log(this.MAX_FREQ) / Math.log(10) - this.MIN_LOG;
-  }
-};
-
-gui.add(SETTINGS, 'REFRESH_RATE', 15, 500);
-gui.add(SETTINGS, 'MIN_FREQ', 20, 1000);
-gui.add(SETTINGS, 'MAX_FREQ', 1000, 22000);
-gui.add(SETTINGS, 'FFT_SIZE', [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]);
-gui.add(SETTINGS, 'SMOOTHING', 0.0, 1.0).step(0.05);
-gui.add(SETTINGS, 'DISPLAY', ['Logarithmic', 'Linear']);
-
-function binSize(numBins, sampleRate) {
-  var maxFreq = sampleRate / 2;
-  return maxFreq / numBins;
-}
-
-function bucketRange(min, max, numBins, binSize) {
-  var low = Math.floor(min / binSize) - 1;
-  low = low > 0 ? low : 0;
-  var high = Math.floor(max / binSize) - 1;
-  return {
-    low: low,
-    high: high,
-    range: high - low + 1,
-    binSize: binSize
+module.exports = function () {
+  var SETTINGS = {
+    HEADER_SIZE: 35,
+    REFRESH_RATE: 100,
+    MIN_FREQ: 80,
+    MAX_FREQ: 16000,
+    FFT_SIZE: 16384, // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
+    SMOOTHING: 0.0, // 0.0-1.0
+    DISPLAY: 'Logarithmic',
+    get NUM_BINS() {
+      return this.FFT_SIZE / 2;
+    },
+    get MIN_LOG() {
+      return Math.log(this.MIN_FREQ) / Math.log(10);
+    },
+    get LOG_RANGE() {
+      return Math.log(this.MAX_FREQ) / Math.log(10) - this.MIN_LOG;
+    }
   };
-}
 
-function logPosition(freq, minLog, logRange, width) {
-  return (Math.log(freq) / Math.log(10) - minLog) / logRange * width;
-}
-
-var canvas = document.querySelector('canvas');
-var ctx = canvas.getContext('2d');
-
-var mouse = {
-  x: innerWidth / 2,
-  y: innerHeight / 2
-};
-canvas.height = window.innerHeight - SETTINGS.HEADER_SIZE;
-
-canvas.width = window.innerWidth;
-ctx.fillStyle = 'hsl(280, 100%, 10%)';
-ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-// Audio
-var actx = new AudioContext();
-var analyser = actx.createAnalyser();
-analyser.fftSize = parseInt(SETTINGS.FFT_SIZE);
-analyser.smoothingTimeConstant = SETTINGS.SMOOTHING;
-//get mic input
-navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
-  var source = actx.createMediaStreamSource(stream);
-  source.connect(analyser);
-});
-var data = new Uint8Array(analyser.frequencyBinCount);
-var dataBuckets = bucketRange(SETTINGS.MIN_FREQ, SETTINGS.MAX_FREQ, SETTINGS.NUM_BINS, binSize(SETTINGS.NUM_BINS, actx.sampleRate));
-
-// Event Listeners
-window.addEventListener('resize', function () {
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
+  // Canvas setup
+  var canvas = document.querySelector('canvas');
+  var ctx = canvas.getContext('2d');
+  canvas.height = window.innerHeight - SETTINGS.HEADER_SIZE;
+  canvas.width = window.innerWidth;
   ctx.fillStyle = 'hsl(280, 100%, 10%)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-});
 
-canvas.addEventListener('click', function (event) {
-  // by default audio context will be suspended until user interaction.
-  if (actx.state === 'suspended') {
-    actx.resume();
-  }
-});
+  // GUI setup
+  var gui = new dat.GUI();
+  gui.closed = true;
+  gui.add(SETTINGS, 'REFRESH_RATE', 15, 500);
+  gui.add(SETTINGS, 'MIN_FREQ', 20, 1000);
+  gui.add(SETTINGS, 'MAX_FREQ', 1000, 22000);
+  gui.add(SETTINGS, 'FFT_SIZE', [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]);
+  gui.add(SETTINGS, 'SMOOTHING', 0.0, 1.0).step(0.05);
+  gui.add(SETTINGS, 'DISPLAY', ['Logarithmic', 'Linear']);
 
-// Animation Loop
-var refMaxFreq = SETTINGS.MAX_FREQ;
-var refMinFreq = SETTINGS.MIN_FREQ;
-var refTime = Date.now();
-var elapsedTime = 0;
-var imageData = void 0;
-function animate() {
-  // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it, so manual track elapsed time
-  requestAnimationFrame(animate);
-
-  imageData = ctx.getImageData(0, 0, canvas.width, canvas.height - 1);
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.putImageData(imageData, 0, 1);
-
-  if (analyser.fftSize !== parseInt(SETTINGS.FFT_SIZE) || analyser.smoothingTimeConstant !== SETTINGS.SMOOTHING || refMaxFreq !== SETTINGS.MAX_FREQ || refMinFreq !== SETTINGS.MIN_FREQ) {
-    refMaxFreq = SETTINGS.MAX_FREQ;
-    refMinFreq = SETTINGS.MIN_FREQ;
-    analyser.fftSize = parseInt(SETTINGS.FFT_SIZE);
-    analyser.smoothingTimeConstant = SETTINGS.SMOOTHING;
-    data = new Uint8Array(analyser.frequencyBinCount);
-    dataBuckets = bucketRange(SETTINGS.MIN_FREQ, SETTINGS.MAX_FREQ, SETTINGS.NUM_BINS, binSize(SETTINGS.NUM_BINS, actx.sampleRate));
+  // Audio Functions
+  function binSize(numBins, sampleRate) {
+    var maxFreq = sampleRate / 2;
+    return maxFreq / numBins;
   }
 
-  elapsedTime = Date.now() - refTime;
-  // slow down fft to only run every 200 ms
-  if (elapsedTime >= SETTINGS.REFRESH_RATE) {
-    refTime = Date.now();
+  function bucketRange(min, max, numBins, binSize) {
+    var low = Math.floor(min / binSize) - 1;
+    low = low > 0 ? low : 0;
+    var high = Math.floor(max / binSize) - 1;
+    return {
+      low: low,
+      high: high,
+      range: high - low + 1,
+      binSize: binSize
+    };
+  }
 
-    analyser.getByteFrequencyData(data);
+  function logPosition(freq, minLog, logRange, width) {
+    return (Math.log(freq) / Math.log(10) - minLog) / logRange * width;
+  }
 
-    var prevLogPos = 0;
+  // Audio
+  var actx = new AudioContext();
+  var analyser = actx.createAnalyser();
+  analyser.fftSize = parseInt(SETTINGS.FFT_SIZE);
+  analyser.smoothingTimeConstant = SETTINGS.SMOOTHING;
+  //get mic input
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+    var source = actx.createMediaStreamSource(stream);
+    source.connect(analyser);
+  });
+  var data = new Uint8Array(analyser.frequencyBinCount);
+  var dataBuckets = bucketRange(SETTINGS.MIN_FREQ, SETTINGS.MAX_FREQ, SETTINGS.NUM_BINS, binSize(SETTINGS.NUM_BINS, actx.sampleRate));
 
-    if (SETTINGS.DISPLAY === 'Logarithmic') {
-      for (var i = dataBuckets.low; i <= dataBuckets.high; i++) {
-        // console.log(prevLogPos)
-        var rat = data[i] / 255;
-        var hue = Math.round((rat * 120 + 280) % 360);
-        var sat = '100%';
-        var lit = 10 + 70 * rat;
-        ctx.beginPath();
-        ctx.strokeStyle = 'hsl(' + hue + ', ' + sat + ', ' + lit + '%)';
-        ctx.moveTo(prevLogPos, 0);
-        prevLogPos = logPosition(i * dataBuckets.binSize, SETTINGS.MIN_LOG, SETTINGS.LOG_RANGE, canvas.width);
-        ctx.lineTo(prevLogPos, 0);
-        ctx.stroke();
-        ctx.closePath();
+  // Event Listeners
+  window.addEventListener('resize', function () {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight;
+    ctx.fillStyle = 'hsl(280, 100%, 10%)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  });
+
+  // Animation Loop
+  var refMaxFreq = SETTINGS.MAX_FREQ;
+  var refMinFreq = SETTINGS.MIN_FREQ;
+  var refTime = Date.now();
+  var elapsedTime = 0;
+  var imageData = void 0;
+  function animate() {
+    // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it, so manual track elapsed time
+    requestAnimationFrame(animate);
+
+    imageData = ctx.getImageData(0, 0, canvas.width, canvas.height - 1);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.putImageData(imageData, 0, 1);
+
+    // reset audio fields when user changes settings.
+    if (analyser.fftSize !== parseInt(SETTINGS.FFT_SIZE) || analyser.smoothingTimeConstant !== SETTINGS.SMOOTHING || refMaxFreq !== SETTINGS.MAX_FREQ || refMinFreq !== SETTINGS.MIN_FREQ) {
+      refMaxFreq = SETTINGS.MAX_FREQ;
+      refMinFreq = SETTINGS.MIN_FREQ;
+      analyser.fftSize = parseInt(SETTINGS.FFT_SIZE);
+      analyser.smoothingTimeConstant = SETTINGS.SMOOTHING;
+      data = new Uint8Array(analyser.frequencyBinCount);
+      dataBuckets = bucketRange(SETTINGS.MIN_FREQ, SETTINGS.MAX_FREQ, SETTINGS.NUM_BINS, binSize(SETTINGS.NUM_BINS, actx.sampleRate));
+    }
+
+    elapsedTime = Date.now() - refTime;
+    // slow down fft refresh rate from default 15-18 ms
+    if (elapsedTime >= SETTINGS.REFRESH_RATE) {
+      refTime = Date.now();
+
+      analyser.getByteFrequencyData(data);
+
+      var prevLogPos = 0;
+
+      if (SETTINGS.DISPLAY === 'Logarithmic') {
+        for (var i = dataBuckets.low; i <= dataBuckets.high; i++) {
+          var rat = data[i] / 255;
+          var hue = Math.round((rat * 120 + 280) % 360);
+          var sat = '100%';
+          var lit = 10 + 70 * rat;
+          ctx.beginPath();
+          ctx.strokeStyle = 'hsl(' + hue + ', ' + sat + ', ' + lit + '%)';
+          ctx.moveTo(prevLogPos, 0);
+          prevLogPos = logPosition(i * dataBuckets.binSize, SETTINGS.MIN_LOG, SETTINGS.LOG_RANGE, canvas.width);
+          ctx.lineTo(prevLogPos, 0);
+          ctx.stroke();
+          ctx.closePath();
+        }
+      } else {
+        // linear
+        for (var _i = dataBuckets.low; _i <= dataBuckets.high; _i++) {
+          var _rat = data[_i] / 255;
+          var _hue = Math.round((_rat * 120 + 280) % 360);
+          var _sat = '100%';
+          var _lit = 10 + 70 * _rat;
+          ctx.beginPath();
+          ctx.strokeStyle = 'hsl(' + _hue + ', ' + _sat + ', ' + _lit + '%)';
+          ctx.moveTo(_i * canvas.width / dataBuckets.range, 0);
+          ctx.lineTo(canvas.width / dataBuckets.range + _i * canvas.width / dataBuckets.range, 0);
+          ctx.stroke();
+          ctx.closePath();
+        }
       }
     } else {
-      // linear
-      for (var _i = dataBuckets.low; _i <= dataBuckets.high; _i++) {
-        var _rat = data[_i] / 255;
-        var _hue = Math.round((_rat * 120 + 280) % 360);
-        var _sat = '100%';
-        var _lit = 10 + 70 * _rat;
-        ctx.beginPath();
-        ctx.strokeStyle = 'hsl(' + _hue + ', ' + _sat + ', ' + _lit + '%)';
-        ctx.moveTo(_i * canvas.width / dataBuckets.range, 0);
-        ctx.lineTo(canvas.width / dataBuckets.range + _i * canvas.width / dataBuckets.range, 0);
-        ctx.stroke();
-        ctx.closePath();
-      }
+      var topRow = imageData = ctx.getImageData(0, 1, canvas.width, 2);
+      ctx.putImageData(imageData, 0, 0);
     }
-  } else {
-    var topRow = imageData = ctx.getImageData(0, 1, canvas.width, 2);
-    ctx.putImageData(imageData, 0, 0);
   }
-}
 
-animate();
+  animate();
+};
 
 /***/ })
 

@@ -6,9 +6,8 @@ Not a bad day's work for my first at bat with this API.
 
 ## TODO:
 
-1.  Add a blank "begin" screen to bypass the browser's auto-play restrictions.
-2.  Maybe fix the toolbar styling to be a bit more mobile friendly.
-3.  Refactor the code to be less procedural
+1.  Maybe fix the toolbar styling to be a bit more mobile friendly.
+2.  Refactor the code to be less procedural in nature.
 
 ## Getting Started
 

@@ -7,15 +7,30 @@
       body {
         margin: 0;
         background: black;
+        color: white;
+        text-align: center;
       }
       canvas {
-        background: hsl(280, 100%, 10%);
+        /* display: none; */
       }
       menu {
         height: 35px;
         size: 1em;
-        color: white;
         margin: 0;
+        text-align: left;
+        /* display: none; */
+      }
+      h1 {
+        margin: 0;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        -ms-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+        cursor: pointer;
+      }
+      h1:hover {
+        color: #d3d3d3d3;
       }
       h2 {
         margin: 0;
@@ -26,6 +41,7 @@
     <menu>
       <h2>Spectrogram</h2>
     </menu>
+    <h1 id="start">Click to Start</h1>
     <canvas> </canvas>
   </body>
 </html>
