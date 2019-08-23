@@ -1,8 +1,9 @@
+const HEADER_SIZE = 35
 const REFRESH_RATE = 100
 const MIN_FREQ = 80
-const MAX_FREQ = 16000
+const MAX_FREQ = 12000
 const FFT_SIZE = 16384 // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
-const SMOOTHING = 0.1 // 0-1
+const SMOOTHING = 0 // 0.0-1.0
 const NUM_BINS = FFT_SIZE / 2
 const MIN_LOG = Math.log(MIN_FREQ) / Math.log(10)
 const MAX_LOG = Math.log(MAX_FREQ) / Math.log(10)
@@ -17,7 +18,6 @@ function bucketRange(min, max, numBins, binSize) {
   let low = Math.floor(min / binSize) - 1
   low = low > 0 ? low : 0
   const high = Math.floor(max / binSize) - 1
-
   return {
     low,
     high,
@@ -39,7 +39,7 @@ const mouse = {
 }
 
 canvas.width = window.innerWidth
-canvas.height = window.innerHeight
+canvas.height = window.innerHeight - HEADER_SIZE
 ctx.fillStyle = 'hsl(280, 100%, 10%)'
 ctx.fillRect(0, 0, canvas.width, canvas.height)
 
@@ -72,7 +72,8 @@ canvas.addEventListener('mousemove', event => {
 window.addEventListener('resize', () => {
   canvas.width = innerWidth
   canvas.height = innerHeight
-  init()
+  ctx.fillStyle = 'hsl(280, 100%, 10%)'
+  ctx.fillRect(0, 0, canvas.width, canvas.height)
 })
 
 canvas.addEventListener('click', event => {
