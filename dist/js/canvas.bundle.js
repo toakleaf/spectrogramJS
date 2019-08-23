@@ -2653,6 +2653,7 @@ var SETTINGS = {
   MAX_FREQ: 16000,
   FFT_SIZE: 16384, // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
   SMOOTHING: 0.0, // 0.0-1.0
+  DISPLAY: 'Logarithmic',
   get NUM_BINS() {
     return this.FFT_SIZE / 2;
   },
@@ -2669,6 +2670,7 @@ gui.add(SETTINGS, 'MIN_FREQ', 20, 1000);
 gui.add(SETTINGS, 'MAX_FREQ', 1000, 22000);
 gui.add(SETTINGS, 'FFT_SIZE', [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]);
 gui.add(SETTINGS, 'SMOOTHING', 0.0, 1.0).step(0.05);
+gui.add(SETTINGS, 'DISPLAY', ['Logarithmic', 'Linear']);
 
 function binSize(numBins, sampleRate) {
   var maxFreq = sampleRate / 2;
@@ -2764,40 +2766,37 @@ function animate() {
     analyser.getByteFrequencyData(data);
 
     var prevLogPos = 0;
-    for (var i = dataBuckets.low; i <= dataBuckets.high; i++) {
-      // console.log(prevLogPos)
-      var rat = data[i] / 255;
-      var hue = Math.round((rat * 120 + 280) % 360);
-      var sat = '100%';
-      var lit = 10 + 70 * rat;
-      ctx.beginPath();
-      ctx.strokeStyle = 'hsl(' + hue + ', ' + sat + ', ' + lit + '%)';
-      ctx.moveTo(prevLogPos, 0);
-      prevLogPos = logPosition(i * dataBuckets.binSize, SETTINGS.MIN_LOG, SETTINGS.LOG_RANGE, canvas.width);
-      ctx.lineTo(prevLogPos, 0);
-      ctx.stroke();
-      ctx.closePath();
-    }
 
-    // // linear
-    // for (let i = dataBuckets.low; i <= dataBuckets.high; i++) {
-    //   let rat = data[i] / 255
-    //   let hue = Math.round((rat * 120 + 280) % 360)
-    //   let sat = '100%'
-    //   let lit = 10 + 70 * rat
-    //   ctx.beginPath()
-    //   ctx.strokeStyle = `hsl(${hue}, ${sat}, ${lit}%)`
-    //   ctx.moveTo((i * canvas.width) / dataBuckets.range, 0)
-    //   // ctx.moveTo(x, H - i * h)
-    //   ctx.lineTo(
-    //     canvas.width / dataBuckets.range +
-    //       (i * canvas.width) / dataBuckets.range,
-    //     0
-    //   )
-    //   // ctx.lineTo(x, H - (i * h + h))
-    //   ctx.stroke()
-    //   ctx.closePath()
-    // }
+    if (SETTINGS.DISPLAY === 'Logarithmic') {
+      for (var i = dataBuckets.low; i <= dataBuckets.high; i++) {
+        // console.log(prevLogPos)
+        var rat = data[i] / 255;
+        var hue = Math.round((rat * 120 + 280) % 360);
+        var sat = '100%';
+        var lit = 10 + 70 * rat;
+        ctx.beginPath();
+        ctx.strokeStyle = 'hsl(' + hue + ', ' + sat + ', ' + lit + '%)';
+        ctx.moveTo(prevLogPos, 0);
+        prevLogPos = logPosition(i * dataBuckets.binSize, SETTINGS.MIN_LOG, SETTINGS.LOG_RANGE, canvas.width);
+        ctx.lineTo(prevLogPos, 0);
+        ctx.stroke();
+        ctx.closePath();
+      }
+    } else {
+      // linear
+      for (var _i = dataBuckets.low; _i <= dataBuckets.high; _i++) {
+        var _rat = data[_i] / 255;
+        var _hue = Math.round((_rat * 120 + 280) % 360);
+        var _sat = '100%';
+        var _lit = 10 + 70 * _rat;
+        ctx.beginPath();
+        ctx.strokeStyle = 'hsl(' + _hue + ', ' + _sat + ', ' + _lit + '%)';
+        ctx.moveTo(_i * canvas.width / dataBuckets.range, 0);
+        ctx.lineTo(canvas.width / dataBuckets.range + _i * canvas.width / dataBuckets.range, 0);
+        ctx.stroke();
+        ctx.closePath();
+      }
+    }
   } else {
     var topRow = imageData = ctx.getImageData(0, 1, canvas.width, 2);
     ctx.putImageData(imageData, 0, 0);
