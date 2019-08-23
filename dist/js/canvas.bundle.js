@@ -2729,7 +2729,8 @@ module.exports = function () {
   }
 
   // Audio
-  var actx = new AudioContext();
+  var ContextConstructor = window.AudioContext || window.webkitAudioContext;
+  var actx = new ContextConstructor();
   var analyser = actx.createAnalyser();
   analyser.fftSize = parseInt(SETTINGS.FFT_SIZE);
   analyser.smoothingTimeConstant = SETTINGS.SMOOTHING;

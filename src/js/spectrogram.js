@@ -73,7 +73,8 @@ module.exports = function() {
   }
 
   // Audio
-  const actx = new AudioContext()
+  const ContextConstructor = window.AudioContext || window.webkitAudioContext
+  const actx = new ContextConstructor()
   const analyser = actx.createAnalyser()
   analyser.fftSize = parseInt(SETTINGS.FFT_SIZE)
   analyser.smoothingTimeConstant = SETTINGS.SMOOTHING
