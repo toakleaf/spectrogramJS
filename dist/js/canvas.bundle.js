@@ -2644,26 +2644,31 @@ var dat = _interopRequireWildcard(_dat);
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
 var gui = new dat.GUI();
+gui.closed = true;
 
 var SETTINGS = {
   HEADER_SIZE: 35,
   REFRESH_RATE: 100,
   MIN_FREQ: 80,
-  MAX_FREQ: 12000,
+  MAX_FREQ: 16000,
   FFT_SIZE: 16384, // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
-  SMOOTHING: 0 // 0.0-1.0
+  SMOOTHING: 0.0, // 0.0-1.0
+  get NUM_BINS() {
+    return this.FFT_SIZE / 2;
+  },
+  get MIN_LOG() {
+    return Math.log(this.MIN_FREQ) / Math.log(10);
+  },
+  get LOG_RANGE() {
+    return Math.log(this.MAX_FREQ) / Math.log(10) - this.MIN_LOG;
+  }
 };
-
-var NUM_BINS = SETTINGS.FFT_SIZE / 2;
-var MIN_LOG = Math.log(SETTINGS.MIN_FREQ) / Math.log(10);
-var MAX_LOG = Math.log(SETTINGS.MAX_FREQ) / Math.log(10);
-var LOG_RANGE = MAX_LOG - MIN_LOG;
 
 gui.add(SETTINGS, 'REFRESH_RATE', 15, 500);
 gui.add(SETTINGS, 'MIN_FREQ', 20, 1000);
 gui.add(SETTINGS, 'MAX_FREQ', 1000, 22000);
 gui.add(SETTINGS, 'FFT_SIZE', [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]);
-gui.add(SETTINGS, 'SMOOTHING', 0.0, 1.0);
+gui.add(SETTINGS, 'SMOOTHING', 0.0, 1.0).step(0.05);
 
 function binSize(numBins, sampleRate) {
   var maxFreq = sampleRate / 2;
@@ -2704,22 +2709,15 @@ var actx = new AudioContext();
 var analyser = actx.createAnalyser();
 analyser.fftSize = parseInt(SETTINGS.FFT_SIZE);
 analyser.smoothingTimeConstant = SETTINGS.SMOOTHING;
-
 //get mic input
 navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
   var source = actx.createMediaStreamSource(stream);
   source.connect(analyser);
 });
 var data = new Uint8Array(analyser.frequencyBinCount);
-analyser.getByteFrequencyData(data);
-var dataBuckets = bucketRange(SETTINGS.MIN_FREQ, SETTINGS.MAX_FREQ, NUM_BINS, binSize(NUM_BINS, actx.sampleRate));
+var dataBuckets = bucketRange(SETTINGS.MIN_FREQ, SETTINGS.MAX_FREQ, SETTINGS.NUM_BINS, binSize(SETTINGS.NUM_BINS, actx.sampleRate));
 
 // Event Listeners
-canvas.addEventListener('mousemove', function (event) {
-  mouse.x = event.clientX;
-  mouse.y = event.clientY;
-});
-
 window.addEventListener('resize', function () {
   canvas.width = innerWidth;
   canvas.height = innerHeight;
@@ -2735,6 +2733,8 @@ canvas.addEventListener('click', function (event) {
 });
 
 // Animation Loop
+var refMaxFreq = SETTINGS.MAX_FREQ;
+var refMinFreq = SETTINGS.MIN_FREQ;
 var refTime = Date.now();
 var elapsedTime = 0;
 var imageData = void 0;
@@ -2742,19 +2742,21 @@ function animate() {
   // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it, so manual track elapsed time
   requestAnimationFrame(animate);
 
-  // if (actx.state === 'suspended') {
-  //   ctx.clearRect(0, 0, canvas.width, canvas.height)
-  //   ctx.fillStyle = '#fff'
-  //   ctx.fillText('CLICK TO BEGIN', mouse.x, mouse.y)
-  // }
-
   imageData = ctx.getImageData(0, 0, canvas.width, canvas.height - 1);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   ctx.fillRect(0, 0, canvas.width, canvas.height);
   ctx.putImageData(imageData, 0, 1);
 
-  elapsedTime = Date.now() - refTime;
+  if (analyser.fftSize !== parseInt(SETTINGS.FFT_SIZE) || analyser.smoothingTimeConstant !== SETTINGS.SMOOTHING || refMaxFreq !== SETTINGS.MAX_FREQ || refMinFreq !== SETTINGS.MIN_FREQ) {
+    refMaxFreq = SETTINGS.MAX_FREQ;
+    refMinFreq = SETTINGS.MIN_FREQ;
+    analyser.fftSize = parseInt(SETTINGS.FFT_SIZE);
+    analyser.smoothingTimeConstant = SETTINGS.SMOOTHING;
+    data = new Uint8Array(analyser.frequencyBinCount);
+    dataBuckets = bucketRange(SETTINGS.MIN_FREQ, SETTINGS.MAX_FREQ, SETTINGS.NUM_BINS, binSize(SETTINGS.NUM_BINS, actx.sampleRate));
+  }
 
+  elapsedTime = Date.now() - refTime;
   // slow down fft to only run every 200 ms
   if (elapsedTime >= SETTINGS.REFRESH_RATE) {
     refTime = Date.now();
@@ -2771,7 +2773,7 @@ function animate() {
       ctx.beginPath();
       ctx.strokeStyle = 'hsl(' + hue + ', ' + sat + ', ' + lit + '%)';
       ctx.moveTo(prevLogPos, 0);
-      prevLogPos = logPosition(i * dataBuckets.binSize, MIN_LOG, LOG_RANGE, canvas.width);
+      prevLogPos = logPosition(i * dataBuckets.binSize, SETTINGS.MIN_LOG, SETTINGS.LOG_RANGE, canvas.width);
       ctx.lineTo(prevLogPos, 0);
       ctx.stroke();
       ctx.closePath();
