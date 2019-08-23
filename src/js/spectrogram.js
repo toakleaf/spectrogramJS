@@ -1,5 +1,5 @@
 import gui from './gui.js'
-import { binSize, getBins, logPosition } from './audioUtils.js'
+import { binSize, getBinInfo, logPosition } from './audioUtils.js'
 import settings from './settings.js'
 
 module.exports = function(canvas, ctx) {
@@ -19,12 +19,12 @@ module.exports = function(canvas, ctx) {
 
   // Initialize data array
   let data
-  let dataBinRef
+  let dataBinInfo
   function init() {
     analyser.fftSize = parseInt(settings.FFT_SIZE)
     analyser.smoothingTimeConstant = settings.SMOOTHING
     data = new Uint8Array(analyser.frequencyBinCount)
-    dataBinRef = getBins(
+    dataBinInfo = getBinInfo(
       settings.MIN_FREQ,
       settings.MAX_FREQ,
       settings.NUM_BINS,
@@ -74,7 +74,7 @@ module.exports = function(canvas, ctx) {
       let prevLogPos = 0
 
       // Draw data points on canvas
-      for (let i = dataBinRef.low; i <= dataBinRef.high; i++) {
+      for (let i = dataBinInfo.low; i <= dataBinInfo.high; i++) {
         let rat = data[i] / 255
         let hue = Math.round((rat * 120 + 280) % 360)
         let sat = '100%'
@@ -87,7 +87,7 @@ module.exports = function(canvas, ctx) {
         if (settings.DISPLAY === 'Logarithmic') {
           ctx.moveTo(prevLogPos, 0)
           prevLogPos = logPosition(
-            i * dataBinRef.binSize,
+            i * dataBinInfo.binSize,
             settings.MIN_LOG,
             settings.LOG_RANGE,
             canvas.width
@@ -96,10 +96,10 @@ module.exports = function(canvas, ctx) {
         }
         // Linear Display
         else {
-          ctx.moveTo((i * canvas.width) / dataBinRef.range, 0)
+          ctx.moveTo((i * canvas.width) / dataBinInfo.range, 0)
           ctx.lineTo(
-            canvas.width / dataBinRef.range +
-              (i * canvas.width) / dataBinRef.range,
+            canvas.width / dataBinInfo.range +
+              (i * canvas.width) / dataBinInfo.range,
             0
           )
         }

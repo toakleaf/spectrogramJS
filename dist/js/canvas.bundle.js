@@ -2642,7 +2642,7 @@ function binSize(numBins, sampleRate) {
   return maxFreq / numBins;
 }
 
-function getBins(min, max, numBins, binSize) {
+function getBinInfo(min, max, numBins, binSize) {
   var low = Math.floor(min / binSize) - 1;
   low = low > 0 ? low : 0;
   var high = Math.floor(max / binSize) - 1;
@@ -2658,7 +2658,7 @@ function logPosition(freq, minLog, logRange, width) {
   return (Math.log(freq) / Math.log(10) - minLog) / logRange * width;
 }
 
-module.exports = { binSize: binSize, getBins: getBins, logPosition: logPosition };
+module.exports = { binSize: binSize, getBinInfo: getBinInfo, logPosition: logPosition };
 
 /***/ }),
 
@@ -2681,6 +2681,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var HEADER_SIZE = 35;
 var start = document.querySelector('#start');
 
+// Audio Context is requires user input to enable so browsers don't block as spam
 start.addEventListener('click', function (event) {
   start.style.display = 'none';
 
@@ -2802,12 +2803,12 @@ module.exports = function (canvas, ctx) {
 
   // Initialize data array
   var data = void 0;
-  var dataBinRef = void 0;
+  var dataBinInfo = void 0;
   function init() {
     analyser.fftSize = parseInt(_settings2.default.FFT_SIZE);
     analyser.smoothingTimeConstant = _settings2.default.SMOOTHING;
     data = new Uint8Array(analyser.frequencyBinCount);
-    dataBinRef = (0, _audioUtils.getBins)(_settings2.default.MIN_FREQ, _settings2.default.MAX_FREQ, _settings2.default.NUM_BINS, (0, _audioUtils.binSize)(_settings2.default.NUM_BINS, actx.sampleRate));
+    dataBinInfo = (0, _audioUtils.getBinInfo)(_settings2.default.MIN_FREQ, _settings2.default.MAX_FREQ, _settings2.default.NUM_BINS, (0, _audioUtils.binSize)(_settings2.default.NUM_BINS, actx.sampleRate));
   }
   init();
 
@@ -2847,7 +2848,7 @@ module.exports = function (canvas, ctx) {
       var prevLogPos = 0;
 
       // Draw data points on canvas
-      for (var i = dataBinRef.low; i <= dataBinRef.high; i++) {
+      for (var i = dataBinInfo.low; i <= dataBinInfo.high; i++) {
         var rat = data[i] / 255;
         var hue = Math.round((rat * 120 + 280) % 360);
         var sat = '100%';
@@ -2859,13 +2860,13 @@ module.exports = function (canvas, ctx) {
         // Logarithmic Display
         if (_settings2.default.DISPLAY === 'Logarithmic') {
           ctx.moveTo(prevLogPos, 0);
-          prevLogPos = (0, _audioUtils.logPosition)(i * dataBinRef.binSize, _settings2.default.MIN_LOG, _settings2.default.LOG_RANGE, canvas.width);
+          prevLogPos = (0, _audioUtils.logPosition)(i * dataBinInfo.binSize, _settings2.default.MIN_LOG, _settings2.default.LOG_RANGE, canvas.width);
           ctx.lineTo(prevLogPos, 0);
         }
         // Linear Display
         else {
-            ctx.moveTo(i * canvas.width / dataBinRef.range, 0);
-            ctx.lineTo(canvas.width / dataBinRef.range + i * canvas.width / dataBinRef.range, 0);
+            ctx.moveTo(i * canvas.width / dataBinInfo.range, 0);
+            ctx.lineTo(canvas.width / dataBinInfo.range + i * canvas.width / dataBinInfo.range, 0);
           }
 
         ctx.stroke();

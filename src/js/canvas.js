@@ -3,6 +3,7 @@ import spectrogram from './spectrogram.js'
 const HEADER_SIZE = 35
 const start = document.querySelector('#start')
 
+// Audio Context is requires user input to enable so browsers don't block as spam
 start.addEventListener('click', event => {
   start.style.display = 'none'
 
