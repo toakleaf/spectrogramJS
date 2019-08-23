@@ -1,13 +1,38 @@
-const HEADER_SIZE = 35
-const REFRESH_RATE = 100
-const MIN_FREQ = 80
-const MAX_FREQ = 12000
-const FFT_SIZE = 16384 // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
-const SMOOTHING = 0 // 0.0-1.0
-const NUM_BINS = FFT_SIZE / 2
-const MIN_LOG = Math.log(MIN_FREQ) / Math.log(10)
-const MAX_LOG = Math.log(MAX_FREQ) / Math.log(10)
+import * as dat from 'dat.gui'
+
+const gui = new dat.GUI()
+
+const SETTINGS = {
+  HEADER_SIZE: 35,
+  REFRESH_RATE: 100,
+  MIN_FREQ: 80,
+  MAX_FREQ: 12000,
+  FFT_SIZE: 16384, // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
+  SMOOTHING: 0 // 0.0-1.0
+}
+
+const NUM_BINS = SETTINGS.FFT_SIZE / 2
+const MIN_LOG = Math.log(SETTINGS.MIN_FREQ) / Math.log(10)
+const MAX_LOG = Math.log(SETTINGS.MAX_FREQ) / Math.log(10)
 const LOG_RANGE = MAX_LOG - MIN_LOG
+
+gui.add(SETTINGS, 'REFRESH_RATE', 15, 500)
+gui.add(SETTINGS, 'MIN_FREQ', 20, 1000)
+gui.add(SETTINGS, 'MAX_FREQ', 1000, 22000)
+gui.add(SETTINGS, 'FFT_SIZE', [
+  32,
+  64,
+  128,
+  256,
+  512,
+  1024,
+  2048,
+  4096,
+  8192,
+  16384,
+  32768
+])
+gui.add(SETTINGS, 'SMOOTHING', 0.0, 1.0)
 
 function binSize(numBins, sampleRate) {
   const maxFreq = sampleRate / 2
@@ -37,17 +62,17 @@ const mouse = {
   x: innerWidth / 2,
   y: innerHeight / 2
 }
+canvas.height = window.innerHeight - SETTINGS.HEADER_SIZE
 
 canvas.width = window.innerWidth
-canvas.height = window.innerHeight - HEADER_SIZE
 ctx.fillStyle = 'hsl(280, 100%, 10%)'
 ctx.fillRect(0, 0, canvas.width, canvas.height)
 
 // Audio
 const actx = new AudioContext()
 const analyser = actx.createAnalyser()
-analyser.fftSize = FFT_SIZE
-analyser.smoothingTimeConstant = SMOOTHING
+analyser.fftSize = parseInt(SETTINGS.FFT_SIZE)
+analyser.smoothingTimeConstant = SETTINGS.SMOOTHING
 
 //get mic input
 navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
@@ -57,8 +82,8 @@ navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
 const data = new Uint8Array(analyser.frequencyBinCount)
 analyser.getByteFrequencyData(data)
 const dataBuckets = bucketRange(
-  MIN_FREQ,
-  MAX_FREQ,
+  SETTINGS.MIN_FREQ,
+  SETTINGS.MAX_FREQ,
   NUM_BINS,
   binSize(NUM_BINS, actx.sampleRate)
 )
@@ -105,7 +130,7 @@ function animate() {
   elapsedTime = Date.now() - refTime
 
   // slow down fft to only run every 200 ms
-  if (elapsedTime >= REFRESH_RATE) {
+  if (elapsedTime >= SETTINGS.REFRESH_RATE) {
     refTime = Date.now()
 
     analyser.getByteFrequencyData(data)
