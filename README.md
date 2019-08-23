@@ -1,8 +1,8 @@
 ![Spectrogram Screen Shot](/screenshot.jpg 'Spectrogram Screen Shot')
 
-Had a free day, so I thought I'd mess around with the [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) a bit. This is a really nice, large spectrogram, with controls for the fundamental parameters so you can really zoom in on a frequency, and control the overall latency. It's also capable of flipping between linear and logarithmic plotting, which is kinda a neat feature.
+Had a free day, so I thought I'd mess around with the [Web Audio API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API) a bit. I've always wanted a really large displayed spectrogram with easy controls for zooming in/out on specific frequency bands and controlling latency. It's also capable of flipping between linear and logarithmic plotting, which is kinda a neat feature.
 
-Not a bad day's work.
+Not a bad day's work for my first at bat with this API.
 
 ## TODO:
 
