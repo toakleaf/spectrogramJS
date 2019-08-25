@@ -1,4 +1,4 @@
-import spectrogram from './spectrogram.js'
+import spectrograph from './spectrograph.js'
 import foreground from './foreground.js'
 import { Settings } from './settings.js'
 
@@ -12,20 +12,20 @@ start.addEventListener('click', event => {
   // Instantiate Settings
   let settings = new Settings()
 
-  // Canvas setup
-  const spectrogramCanvas = document.querySelector('canvas#spectrogram')
-  const ctx = spectrogramCanvas.getContext('2d')
-  spectrogramCanvas.height = window.innerHeight - HEADER_SIZE
-  spectrogramCanvas.width = window.innerWidth
+  // Spectrograph Canvas setup
+  const spectrographCanvas = document.querySelector('canvas#spectrograph')
+  const ctx = spectrographCanvas.getContext('2d')
+  spectrographCanvas.height = window.innerHeight - HEADER_SIZE
+  spectrographCanvas.width = window.innerWidth
   ctx.fillStyle = 'hsl(280, 100%, 10%)'
-  ctx.fillRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height)
+  ctx.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height)
 
   window.addEventListener('resize', () => {
-    spectrogramCanvas.width = innerWidth
-    spectrogramCanvas.height = innerHeight
+    spectrographCanvas.width = innerWidth
+    spectrographCanvas.height = innerHeight
     ctx.fillStyle = 'hsl(280, 100%, 10%)'
-    ctx.fillRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height)
+    ctx.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height)
   })
 
-  spectrogram(spectrogramCanvas, ctx, settings)
+  spectrograph(spectrographCanvas, ctx, settings)
 })

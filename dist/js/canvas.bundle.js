@@ -2672,9 +2672,9 @@ module.exports = { binSize: binSize, getBinInfo: getBinInfo, logPosition: logPos
 "use strict";
 
 
-var _spectrogram = __webpack_require__(/*! ./spectrogram.js */ "./src/js/spectrogram.js");
+var _spectrograph = __webpack_require__(/*! ./spectrograph.js */ "./src/js/spectrograph.js");
 
-var _spectrogram2 = _interopRequireDefault(_spectrogram);
+var _spectrograph2 = _interopRequireDefault(_spectrograph);
 
 var _foreground = __webpack_require__(/*! ./foreground.js */ "./src/js/foreground.js");
 
@@ -2694,22 +2694,22 @@ start.addEventListener('click', function (event) {
   // Instantiate Settings
   var settings = new _settings.Settings();
 
-  // Canvas setup
-  var spectrogramCanvas = document.querySelector('canvas#spectrogram');
-  var ctx = spectrogramCanvas.getContext('2d');
-  spectrogramCanvas.height = window.innerHeight - HEADER_SIZE;
-  spectrogramCanvas.width = window.innerWidth;
+  // Spectrograph Canvas setup
+  var spectrographCanvas = document.querySelector('canvas#spectrograph');
+  var ctx = spectrographCanvas.getContext('2d');
+  spectrographCanvas.height = window.innerHeight - HEADER_SIZE;
+  spectrographCanvas.width = window.innerWidth;
   ctx.fillStyle = 'hsl(280, 100%, 10%)';
-  ctx.fillRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height);
+  ctx.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height);
 
   window.addEventListener('resize', function () {
-    spectrogramCanvas.width = innerWidth;
-    spectrogramCanvas.height = innerHeight;
+    spectrographCanvas.width = innerWidth;
+    spectrographCanvas.height = innerHeight;
     ctx.fillStyle = 'hsl(280, 100%, 10%)';
-    ctx.fillRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height);
+    ctx.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height);
   });
 
-  (0, _spectrogram2.default)(spectrogramCanvas, ctx, settings);
+  (0, _spectrograph2.default)(spectrographCanvas, ctx, settings);
 });
 
 /***/ }),
@@ -2807,10 +2807,10 @@ module.exports = { Settings: Settings };
 
 /***/ }),
 
-/***/ "./src/js/spectrogram.js":
-/*!*******************************!*\
-  !*** ./src/js/spectrogram.js ***!
-  \*******************************/
+/***/ "./src/js/spectrograph.js":
+/*!********************************!*\
+  !*** ./src/js/spectrograph.js ***!
+  \********************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
