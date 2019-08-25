@@ -8,19 +8,19 @@ start.addEventListener('click', event => {
   start.style.display = 'none'
 
   // Canvas setup
-  const canvas = document.querySelector('canvas')
-  const ctx = canvas.getContext('2d')
-  canvas.height = window.innerHeight - HEADER_SIZE
-  canvas.width = window.innerWidth
+  const spectrogramCanvas = document.querySelector('canvas#spectrogram')
+  const ctx = spectrogramCanvas.getContext('2d')
+  spectrogramCanvas.height = window.innerHeight - HEADER_SIZE
+  spectrogramCanvas.width = window.innerWidth
   ctx.fillStyle = 'hsl(280, 100%, 10%)'
-  ctx.fillRect(0, 0, canvas.width, canvas.height)
+  ctx.fillRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height)
 
   window.addEventListener('resize', () => {
-    canvas.width = innerWidth
-    canvas.height = innerHeight
+    spectrogramCanvas.width = innerWidth
+    spectrogramCanvas.height = innerHeight
     ctx.fillStyle = 'hsl(280, 100%, 10%)'
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.fillRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height)
   })
 
-  spectrogram(canvas, ctx)
+  spectrogram(spectrogramCanvas, ctx)
 })

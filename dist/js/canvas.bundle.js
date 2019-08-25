@@ -2686,21 +2686,21 @@ start.addEventListener('click', function (event) {
   start.style.display = 'none';
 
   // Canvas setup
-  var canvas = document.querySelector('canvas');
-  var ctx = canvas.getContext('2d');
-  canvas.height = window.innerHeight - HEADER_SIZE;
-  canvas.width = window.innerWidth;
+  var spectrogramCanvas = document.querySelector('canvas#spectrogram');
+  var ctx = spectrogramCanvas.getContext('2d');
+  spectrogramCanvas.height = window.innerHeight - HEADER_SIZE;
+  spectrogramCanvas.width = window.innerWidth;
   ctx.fillStyle = 'hsl(280, 100%, 10%)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height);
 
   window.addEventListener('resize', function () {
-    canvas.width = innerWidth;
-    canvas.height = innerHeight;
+    spectrogramCanvas.width = innerWidth;
+    spectrogramCanvas.height = innerHeight;
     ctx.fillStyle = 'hsl(280, 100%, 10%)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height);
   });
 
-  (0, _spectrogram2.default)(canvas, ctx);
+  (0, _spectrogram2.default)(spectrogramCanvas, ctx);
 });
 
 /***/ }),
