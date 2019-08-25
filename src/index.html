@@ -32,11 +32,21 @@
       h2 {
         margin: 0;
       }
+      #foreground {
+        position: absolute;
+        z-index: 1;
+        left: 0px;
+      }
+      #spectrogram {
+        position: absolute;
+        z-index: 0;
+        left: 0px;
+      }
     </style>
   </head>
   <body>
     <menu>
-      <h2>Spectrogram js</h2>
+      <h2>SpectrographJS</h2>
     </menu>
     <h1 id="start">Click to Start</h1>
     <canvas id="foreground"> </canvas>
