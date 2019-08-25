@@ -2682,9 +2682,12 @@ var _foreground2 = _interopRequireDefault(_foreground);
 
 var _settings = __webpack_require__(/*! ./settings.js */ "./src/js/settings.js");
 
+var _gui = __webpack_require__(/*! ./gui.js */ "./src/js/gui.js");
+
+var _gui2 = _interopRequireDefault(_gui);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var HEADER_SIZE = 35;
 var start = document.querySelector('#start');
 
 // Audio Context is requires user input to enable so browsers don't block as spam
@@ -2694,22 +2697,35 @@ start.addEventListener('click', function (event) {
   // Instantiate Settings
   var settings = new _settings.Settings();
 
+  // GUI Setup
+  (0, _gui2.default)(settings);
+
   // Spectrograph Canvas setup
   var spectrographCanvas = document.querySelector('canvas#spectrograph');
-  var ctx = spectrographCanvas.getContext('2d');
-  spectrographCanvas.height = window.innerHeight - HEADER_SIZE;
+  var spectrogramCTX = spectrographCanvas.getContext('2d');
+  spectrographCanvas.height = window.innerHeight - settings.CANVAS_ORIGIN.y;
   spectrographCanvas.width = window.innerWidth;
-  ctx.fillStyle = 'hsl(280, 100%, 10%)';
-  ctx.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height);
+  spectrogramCTX.fillStyle = 'hsl(280, 100%, 10%)';
+  spectrogramCTX.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height);
 
+  // Foreground Canvas setup
+  var foregroundCanvas = document.querySelector('canvas#foreground');
+  var foregroundCTX = foregroundCanvas.getContext('2d');
+  foregroundCanvas.height = window.innerHeight - settings.CANVAS_ORIGIN.y;
+  foregroundCanvas.width = window.innerWidth;
+
+  // Clear canvases on resize
   window.addEventListener('resize', function () {
     spectrographCanvas.width = innerWidth;
     spectrographCanvas.height = innerHeight;
-    ctx.fillStyle = 'hsl(280, 100%, 10%)';
-    ctx.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height);
+    foregroundCanvas.width = innerWidth;
+    foregroundCanvas.height = innerHeight;
+    spectrogramCTX.fillStyle = 'hsl(280, 100%, 10%)';
+    spectrogramCTX.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height);
   });
 
-  (0, _spectrograph2.default)(spectrographCanvas, ctx, settings);
+  (0, _spectrograph2.default)(spectrographCanvas, spectrogramCTX, settings);
+  (0, _foreground2.default)(foregroundCanvas, foregroundCTX, settings);
 });
 
 /***/ }),
@@ -2724,7 +2740,30 @@ start.addEventListener('click', function (event) {
 "use strict";
 
 
-module.exports = function (canvas, ctx) {};
+module.exports = function (canvas, ctx, settings) {
+  var mouse = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    active: true
+  };
+
+  canvas.addEventListener('mouseenter', function (event) {
+    mouse.active = true;
+  });
+
+  canvas.addEventListener('mouseleave', function (event) {
+    mouse.active = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+
+  canvas.addEventListener('mousemove', function (event) {
+    mouse.x = event.clientX;
+    mouse.y = event.clientY - settings.CANVAS_ORIGIN.y;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#fff';
+    ctx.fillText('(' + mouse.x + ',' + mouse.y + ')', mouse.x, mouse.y + 30);
+  });
+};
 
 /***/ }),
 
@@ -2781,6 +2820,7 @@ var Settings = function () {
     this.FFT_SIZE = 16384; // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
     this.SMOOTHING = 0.0; // 0.0-1.0
     this.DISPLAY = 'Logarithmic';
+    this.CANVAS_ORIGIN = { x: 0, y: 35 };
   }
 
   _createClass(Settings, [{
@@ -2817,18 +2857,9 @@ module.exports = { Settings: Settings };
 "use strict";
 
 
-var _gui = __webpack_require__(/*! ./gui.js */ "./src/js/gui.js");
-
-var _gui2 = _interopRequireDefault(_gui);
-
 var _audioUtils = __webpack_require__(/*! ./audioUtils.js */ "./src/js/audioUtils.js");
 
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
 module.exports = function (canvas, ctx, settings) {
-  // GUI Setup
-  (0, _gui2.default)(settings);
-
   // Audio Setup
   var ContextConstructor = window.AudioContext || window.webkitAudioContext;
   var actx = new ContextConstructor();

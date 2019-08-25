@@ -1,10 +1,6 @@
-import gui from './gui.js'
 import { binSize, getBinInfo, logPosition } from './audioUtils.js'
 
 module.exports = function(canvas, ctx, settings) {
-  // GUI Setup
-  gui(settings)
-
   // Audio Setup
   const ContextConstructor = window.AudioContext || window.webkitAudioContext
   const actx = new ContextConstructor()

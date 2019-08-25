@@ -1,8 +1,8 @@
 import spectrograph from './spectrograph.js'
 import foreground from './foreground.js'
 import { Settings } from './settings.js'
+import gui from './gui.js'
 
-const HEADER_SIZE = 35
 const start = document.querySelector('#start')
 
 // Audio Context is requires user input to enable so browsers don't block as spam
@@ -12,20 +12,43 @@ start.addEventListener('click', event => {
   // Instantiate Settings
   let settings = new Settings()
 
+  // GUI Setup
+  gui(settings)
+
   // Spectrograph Canvas setup
   const spectrographCanvas = document.querySelector('canvas#spectrograph')
-  const ctx = spectrographCanvas.getContext('2d')
-  spectrographCanvas.height = window.innerHeight - HEADER_SIZE
+  const spectrogramCTX = spectrographCanvas.getContext('2d')
+  spectrographCanvas.height = window.innerHeight - settings.CANVAS_ORIGIN.y
   spectrographCanvas.width = window.innerWidth
-  ctx.fillStyle = 'hsl(280, 100%, 10%)'
-  ctx.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height)
+  spectrogramCTX.fillStyle = 'hsl(280, 100%, 10%)'
+  spectrogramCTX.fillRect(
+    0,
+    0,
+    spectrographCanvas.width,
+    spectrographCanvas.height
+  )
 
+  // Foreground Canvas setup
+  const foregroundCanvas = document.querySelector('canvas#foreground')
+  const foregroundCTX = foregroundCanvas.getContext('2d')
+  foregroundCanvas.height = window.innerHeight - settings.CANVAS_ORIGIN.y
+  foregroundCanvas.width = window.innerWidth
+
+  // Clear canvases on resize
   window.addEventListener('resize', () => {
     spectrographCanvas.width = innerWidth
     spectrographCanvas.height = innerHeight
-    ctx.fillStyle = 'hsl(280, 100%, 10%)'
-    ctx.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height)
+    foregroundCanvas.width = innerWidth
+    foregroundCanvas.height = innerHeight
+    spectrogramCTX.fillStyle = 'hsl(280, 100%, 10%)'
+    spectrogramCTX.fillRect(
+      0,
+      0,
+      spectrographCanvas.width,
+      spectrographCanvas.height
+    )
   })
 
-  spectrograph(spectrographCanvas, ctx, settings)
+  spectrograph(spectrographCanvas, spectrogramCTX, settings)
+  foreground(foregroundCanvas, foregroundCTX, settings)
 })
