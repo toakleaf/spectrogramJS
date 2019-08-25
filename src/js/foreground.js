@@ -29,4 +29,10 @@ module.exports = function(canvas, ctx, state) {
       Math.floor(mouse.y + 30)
     )
   })
+
+  document.addEventListener('keyup', function(e) {
+    if (e.keyCode === 32 || e.keyCode === 75) {
+      state.toggleAnimation()
+    }
+  })
 }

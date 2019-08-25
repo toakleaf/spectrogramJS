@@ -8,6 +8,7 @@ class State {
     this.display = 'Logarithmic'
     this.canvasOrigin = { x: 0, y: 35 }
     this.paused = false
+    this.toggleEvent = new Event('toggleAnimation')
   }
 
   get numBins() {
@@ -33,6 +34,12 @@ class State {
       Math.E,
       Math.LN10 * (this.minLog + (pos * this.logRange) / width)
     )
+  }
+
+  // Create a pause event for communication between canvas layers
+  toggleAnimation() {
+    this.paused = !this.paused
+    document.dispatchEvent(this.toggleEvent)
   }
 }
 

@@ -28,7 +28,7 @@ module.exports = function(canvas, ctx, state) {
   }
   init()
 
-  // Reference state outside of animation loop
+  // Local state for reference outside animation loop
   let refMaxFreq = state.maxFreq
   let refMinFreq = state.minFreq
   let refTime = Date.now()
@@ -119,14 +119,12 @@ module.exports = function(canvas, ctx, state) {
     }
   }
 
-  document.addEventListener('keyup', function(e) {
-    if (e.keyCode === 32 || e.keyCode === 75) {
-      state.paused = !state.paused
-      if (state.paused) {
-        stop()
-      } else {
-        start()
-      }
+  // Listen for custom toggleAnimation event declared in state.js
+  document.addEventListener('toggleAnimation', function(e) {
+    if (state.paused) {
+      stop()
+    } else {
+      start()
     }
   })
 

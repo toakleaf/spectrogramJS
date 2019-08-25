@@ -2759,6 +2759,12 @@ module.exports = function (canvas, ctx, state) {
     ctx.fillStyle = '#fff';
     ctx.fillText(state.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' Hz', Math.floor(mouse.x), Math.floor(mouse.y + 30));
   });
+
+  document.addEventListener('keyup', function (e) {
+    if (e.keyCode === 32 || e.keyCode === 75) {
+      state.toggleAnimation();
+    }
+  });
 };
 
 /***/ }),
@@ -2827,7 +2833,7 @@ module.exports = function (canvas, ctx, state) {
   }
   init();
 
-  // Reference state outside of animation loop
+  // Local state for reference outside animation loop
   var refMaxFreq = state.maxFreq;
   var refMinFreq = state.minFreq;
   var refTime = Date.now();
@@ -2909,14 +2915,12 @@ module.exports = function (canvas, ctx, state) {
     }
   }
 
-  document.addEventListener('keyup', function (e) {
-    if (e.keyCode === 32 || e.keyCode === 75) {
-      state.paused = !state.paused;
-      if (state.paused) {
-        stop();
-      } else {
-        start();
-      }
+  // Listen for custom toggleAnimation event declared in state.js
+  document.addEventListener('toggleAnimation', function (e) {
+    if (state.paused) {
+      stop();
+    } else {
+      start();
     }
   });
 
@@ -2951,6 +2955,7 @@ var State = function () {
     this.display = 'Logarithmic';
     this.canvasOrigin = { x: 0, y: 35 };
     this.paused = false;
+    this.toggleEvent = new Event('toggleAnimation');
   }
 
   _createClass(State, [{
@@ -2962,6 +2967,15 @@ var State = function () {
     key: 'logFreq',
     value: function logFreq(pos, width) {
       return Math.pow(Math.E, Math.LN10 * (this.minLog + pos * this.logRange / width));
+    }
+
+    // Create a pause event for communication between canvas layers
+
+  }, {
+    key: 'toggleAnimation',
+    value: function toggleAnimation() {
+      this.paused = !this.paused;
+      document.dispatchEvent(this.toggleEvent);
     }
   }, {
     key: 'numBins',
