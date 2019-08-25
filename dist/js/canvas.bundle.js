@@ -2752,12 +2752,6 @@ module.exports = function (canvas, ctx, state) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
 
-  document.addEventListener('keyup', function (e) {
-    if (e.keyCode === 32 || e.keyCode === 75) {
-      state.paused = !state.paused;
-    }
-  });
-
   canvas.addEventListener('mousemove', function (event) {
     mouse.x = event.clientX;
     mouse.y = event.clientY - state.canvasOrigin.y;
@@ -2839,10 +2833,12 @@ module.exports = function (canvas, ctx, state) {
   var refTime = Date.now();
   var elapsedTime = 0;
   var imageData = void 0;
+  var requestId = void 0;
 
   // Animation Loop
   function animate() {
-    requestAnimationFrame(animate);
+    requestId = undefined;
+    start();
 
     // To animate downward movement, save all but bottom pixel row, clear, and redraw down one pixel
     imageData = ctx.getImageData(0, 0, canvas.width, canvas.height - 1);
@@ -2899,6 +2895,30 @@ module.exports = function (canvas, ctx, state) {
       ctx.putImageData(imageData, 0, 0);
     }
   }
+
+  function start() {
+    if (!requestId) {
+      requestId = window.requestAnimationFrame(animate);
+    }
+  }
+
+  function stop() {
+    if (requestId) {
+      window.cancelAnimationFrame(requestId);
+      requestId = undefined;
+    }
+  }
+
+  document.addEventListener('keyup', function (e) {
+    if (e.keyCode === 32 || e.keyCode === 75) {
+      state.paused = !state.paused;
+      if (state.paused) {
+        stop();
+      } else {
+        start();
+      }
+    }
+  });
 
   animate();
 };

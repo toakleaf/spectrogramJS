@@ -14,12 +14,6 @@ module.exports = function(canvas, ctx, state) {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
   })
 
-  document.addEventListener('keyup', function(e) {
-    if (e.keyCode === 32 || e.keyCode === 75) {
-      state.paused = !state.paused
-    }
-  })
-
   canvas.addEventListener('mousemove', event => {
     mouse.x = event.clientX
     mouse.y = event.clientY - state.canvasOrigin.y

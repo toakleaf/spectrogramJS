@@ -34,10 +34,12 @@ module.exports = function(canvas, ctx, state) {
   let refTime = Date.now()
   let elapsedTime = 0
   let imageData
+  let requestId
 
   // Animation Loop
   function animate() {
-    requestAnimationFrame(animate)
+    requestId = undefined
+    start()
 
     // To animate downward movement, save all but bottom pixel row, clear, and redraw down one pixel
     imageData = ctx.getImageData(0, 0, canvas.width, canvas.height - 1)
@@ -103,6 +105,30 @@ module.exports = function(canvas, ctx, state) {
       ctx.putImageData(imageData, 0, 0)
     }
   }
+
+  function start() {
+    if (!requestId) {
+      requestId = window.requestAnimationFrame(animate)
+    }
+  }
+
+  function stop() {
+    if (requestId) {
+      window.cancelAnimationFrame(requestId)
+      requestId = undefined
+    }
+  }
+
+  document.addEventListener('keyup', function(e) {
+    if (e.keyCode === 32 || e.keyCode === 75) {
+      state.paused = !state.paused
+      if (state.paused) {
+        stop()
+      } else {
+        start()
+      }
+    }
+  })
 
   animate()
 }
