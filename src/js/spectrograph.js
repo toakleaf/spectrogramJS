@@ -1,4 +1,4 @@
-import { binSize, getBinInfo, logPosition } from './audioUtils.js'
+import { binSize, getBinInfo } from './audioUtils.js'
 
 module.exports = function(canvas, ctx, settings) {
   // Audio Setup
@@ -81,12 +81,7 @@ module.exports = function(canvas, ctx, settings) {
         // Logarithmic Display
         if (settings.DISPLAY === 'Logarithmic') {
           ctx.moveTo(prevLogPos, 0)
-          prevLogPos = logPosition(
-            i * dataBinInfo.binSize,
-            settings.MIN_LOG,
-            settings.LOG_RANGE,
-            canvas.width
-          )
+          prevLogPos = settings.LOG_POS(i * dataBinInfo.binSize, canvas.width)
           ctx.lineTo(prevLogPos, 0)
         }
         // Linear Display

@@ -15,10 +15,4 @@ function getBinInfo(min, max, numBins, binSize) {
   }
 }
 
-function logPosition(freq, minLog, logRange, width) {
-  return Math.floor(
-    ((Math.log(freq) / Math.log(10) - minLog) / logRange) * width
-  )
-}
-
-module.exports = { binSize, getBinInfo, logPosition }
+module.exports = { binSize, getBinInfo }

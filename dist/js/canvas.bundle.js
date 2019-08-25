@@ -2654,11 +2654,7 @@ function getBinInfo(min, max, numBins, binSize) {
   };
 }
 
-function logPosition(freq, minLog, logRange, width) {
-  return Math.floor((Math.log(freq) / Math.log(10) - minLog) / logRange * width);
-}
-
-module.exports = { binSize: binSize, getBinInfo: getBinInfo, logPosition: logPosition };
+module.exports = { binSize: binSize, getBinInfo: getBinInfo };
 
 /***/ }),
 
@@ -2824,6 +2820,11 @@ var Settings = function () {
   }
 
   _createClass(Settings, [{
+    key: 'LOG_POS',
+    value: function LOG_POS(freq, width) {
+      return Math.floor((Math.log(freq) / Math.log(10) - this.MIN_LOG) / this.LOG_RANGE * width);
+    }
+  }, {
     key: 'NUM_BINS',
     get: function get() {
       return this.FFT_SIZE / 2;
@@ -2930,7 +2931,7 @@ module.exports = function (canvas, ctx, settings) {
         // Logarithmic Display
         if (settings.DISPLAY === 'Logarithmic') {
           ctx.moveTo(prevLogPos, 0);
-          prevLogPos = (0, _audioUtils.logPosition)(i * dataBinInfo.binSize, settings.MIN_LOG, settings.LOG_RANGE, canvas.width);
+          prevLogPos = settings.LOG_POS(i * dataBinInfo.binSize, canvas.width);
           ctx.lineTo(prevLogPos, 0);
         }
         // Linear Display

@@ -20,6 +20,12 @@ class Settings {
   get LOG_RANGE() {
     return Math.log(this.MAX_FREQ) / Math.log(10) - this.MIN_LOG
   }
+
+  LOG_POS(freq, width) {
+    return Math.floor(
+      ((Math.log(freq) / Math.log(10) - this.MIN_LOG) / this.LOG_RANGE) * width
+    )
+  }
 }
 
 module.exports = { Settings }
