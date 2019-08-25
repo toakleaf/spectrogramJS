@@ -26,4 +26,5 @@ module.exports = function(state) {
     .step(0.05)
     .name('FFT Smoothing')
   gui.add(state, 'display', ['Logarithmic', 'Linear']).name('Display Type')
+  gui.add(state, 'noteGrid').name('Show Note Grid')
 }

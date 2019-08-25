@@ -10,6 +10,7 @@ module.exports = function(canvas, ctx, state) {
     y: canvas.height / 2,
     active: true
   }
+  let freq = state.minFreq
   let hoveringToggle = false
 
   canvas.addEventListener('mouseenter', event => {
@@ -24,14 +25,11 @@ module.exports = function(canvas, ctx, state) {
   canvas.addEventListener('mousemove', event => {
     mouse.x = event.clientX
     mouse.y = event.clientY
+    freq = state.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2)
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.fillStyle = '#fff'
     ctx.fillText(
-      `${state
-        .logFreq(Math.floor(mouse.x), canvas.width)
-        .toFixed(2)
-        .toString()
-        .replace(/\B(?=(\d{3})+(?!\d))/g, ',')} Hz`,
+      `${'C4'} : ${freq.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} Hz`,
       Math.floor(mouse.x),
       Math.floor(mouse.y)
     )

@@ -32,5 +32,11 @@ module.exports = function(canvas, ctx, state) {
     drawToggle()
   })
 
+  function drawNoteGrid() {
+    // console.log(state.centDiff(466.16, 440))
+    console.log(state.noteName(440))
+  }
+
+  drawNoteGrid()
   drawToggle()
 }
