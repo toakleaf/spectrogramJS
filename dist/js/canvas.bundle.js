@@ -2676,7 +2676,7 @@ var _foreground = __webpack_require__(/*! ./foreground.js */ "./src/js/foregroun
 
 var _foreground2 = _interopRequireDefault(_foreground);
 
-var _settings = __webpack_require__(/*! ./settings.js */ "./src/js/settings.js");
+var _state = __webpack_require__(/*! ./state.js */ "./src/js/state.js");
 
 var _gui = __webpack_require__(/*! ./gui.js */ "./src/js/gui.js");
 
@@ -2690,16 +2690,16 @@ var start = document.querySelector('#start');
 start.addEventListener('click', function (event) {
   start.style.display = 'none';
 
-  // Instantiate Settings
-  var settings = new _settings.Settings();
+  // Instantiate State
+  var state = new _state.State();
 
   // GUI Setup
-  (0, _gui2.default)(settings);
+  (0, _gui2.default)(state);
 
   // Spectrograph Canvas setup
   var spectrographCanvas = document.querySelector('canvas#spectrograph');
   var spectrogramCTX = spectrographCanvas.getContext('2d');
-  spectrographCanvas.height = window.innerHeight - settings.CANVAS_ORIGIN.y;
+  spectrographCanvas.height = window.innerHeight - state.canvasOrigin.y;
   spectrographCanvas.width = window.innerWidth;
   spectrogramCTX.fillStyle = 'hsl(280, 100%, 10%)';
   spectrogramCTX.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height);
@@ -2707,7 +2707,7 @@ start.addEventListener('click', function (event) {
   // Foreground Canvas setup
   var foregroundCanvas = document.querySelector('canvas#foreground');
   var foregroundCTX = foregroundCanvas.getContext('2d');
-  foregroundCanvas.height = window.innerHeight - settings.CANVAS_ORIGIN.y;
+  foregroundCanvas.height = window.innerHeight - state.canvasOrigin.y;
   foregroundCanvas.width = window.innerWidth;
 
   // Clear canvases on resize
@@ -2720,8 +2720,8 @@ start.addEventListener('click', function (event) {
     spectrogramCTX.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height);
   });
 
-  (0, _spectrograph2.default)(spectrographCanvas, spectrogramCTX, settings);
-  (0, _foreground2.default)(foregroundCanvas, foregroundCTX, settings);
+  (0, _spectrograph2.default)(spectrographCanvas, spectrogramCTX, state);
+  (0, _foreground2.default)(foregroundCanvas, foregroundCTX, state);
 });
 
 /***/ }),
@@ -2736,7 +2736,7 @@ start.addEventListener('click', function (event) {
 "use strict";
 
 
-module.exports = function (canvas, ctx, settings) {
+module.exports = function (canvas, ctx, state) {
   var mouse = {
     x: canvas.width / 2,
     y: canvas.height / 2,
@@ -2752,12 +2752,18 @@ module.exports = function (canvas, ctx, settings) {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
 
+  document.addEventListener('keyup', function (e) {
+    if (e.keyCode === 32 || e.keyCode === 75) {
+      state.paused = !state.paused;
+    }
+  });
+
   canvas.addEventListener('mousemove', function (event) {
     mouse.x = event.clientX;
-    mouse.y = event.clientY - settings.CANVAS_ORIGIN.y;
+    mouse.y = event.clientY - state.canvasOrigin.y;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#fff';
-    ctx.fillText('(' + mouse.x + ',' + mouse.y + ')', mouse.x, mouse.y + 30);
+    ctx.fillText(state.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' Hz', Math.floor(mouse.x), Math.floor(mouse.y + 30));
   });
 };
 
@@ -2779,72 +2785,16 @@ var dat = _interopRequireWildcard(_dat);
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-module.exports = function (SETTINGS) {
+module.exports = function (state) {
   var gui = new dat.GUI();
   gui.closed = true;
-  gui.add(SETTINGS, 'REFRESH_RATE', 15, 500);
-  gui.add(SETTINGS, 'MIN_FREQ', 20, 1000);
-  gui.add(SETTINGS, 'MAX_FREQ', 1000, 22000);
-  gui.add(SETTINGS, 'FFT_SIZE', [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]);
-  gui.add(SETTINGS, 'SMOOTHING', 0.0, 1.0).step(0.05);
-  gui.add(SETTINGS, 'DISPLAY', ['Logarithmic', 'Linear']);
+  gui.add(state, 'refreshRate', 15, 500).name('Refresh Rate');
+  gui.add(state, 'minFreq', 20, 1000).name('Min Frequency');
+  gui.add(state, 'maxFreq', 1000, 22000).name('Max Frequency');
+  gui.add(state, 'fftSize', [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]).name('FFT Size');
+  gui.add(state, 'smoothing', 0.0, 1.0).step(0.05).name('FFT Smoothing');
+  gui.add(state, 'display', ['Logarithmic', 'Linear']).name('Display Type');
 };
-
-/***/ }),
-
-/***/ "./src/js/settings.js":
-/*!****************************!*\
-  !*** ./src/js/settings.js ***!
-  \****************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Settings = function () {
-  function Settings() {
-    _classCallCheck(this, Settings);
-
-    this.REFRESH_RATE = 100;
-    this.MIN_FREQ = 80;
-    this.MAX_FREQ = 16000;
-    this.FFT_SIZE = 16384; // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
-    this.SMOOTHING = 0.0; // 0.0-1.0
-    this.DISPLAY = 'Logarithmic';
-    this.CANVAS_ORIGIN = { x: 0, y: 35 };
-  }
-
-  _createClass(Settings, [{
-    key: 'LOG_POS',
-    value: function LOG_POS(freq, width) {
-      return Math.floor((Math.log(freq) / Math.log(10) - this.MIN_LOG) / this.LOG_RANGE * width);
-    }
-  }, {
-    key: 'NUM_BINS',
-    get: function get() {
-      return this.FFT_SIZE / 2;
-    }
-  }, {
-    key: 'MIN_LOG',
-    get: function get() {
-      return Math.log(this.MIN_FREQ) / Math.log(10);
-    }
-  }, {
-    key: 'LOG_RANGE',
-    get: function get() {
-      return Math.log(this.MAX_FREQ) / Math.log(10) - this.MIN_LOG;
-    }
-  }]);
-
-  return Settings;
-}();
-
-module.exports = { Settings: Settings };
 
 /***/ }),
 
@@ -2860,7 +2810,7 @@ module.exports = { Settings: Settings };
 
 var _audioUtils = __webpack_require__(/*! ./audioUtils.js */ "./src/js/audioUtils.js");
 
-module.exports = function (canvas, ctx, settings) {
+module.exports = function (canvas, ctx, state) {
   // Audio Setup
   var ContextConstructor = window.AudioContext || window.webkitAudioContext;
   var actx = new ContextConstructor();
@@ -2876,16 +2826,16 @@ module.exports = function (canvas, ctx, settings) {
   var data = void 0;
   var dataBinInfo = void 0;
   function init() {
-    analyser.fftSize = parseInt(settings.FFT_SIZE);
-    analyser.smoothingTimeConstant = settings.SMOOTHING;
+    analyser.fftSize = parseInt(state.fftSize);
+    analyser.smoothingTimeConstant = state.smoothing;
     data = new Uint8Array(analyser.frequencyBinCount);
-    dataBinInfo = (0, _audioUtils.getBinInfo)(settings.MIN_FREQ, settings.MAX_FREQ, settings.NUM_BINS, (0, _audioUtils.binSize)(settings.NUM_BINS, actx.sampleRate));
+    dataBinInfo = (0, _audioUtils.getBinInfo)(state.minFreq, state.maxFreq, state.numBins, (0, _audioUtils.binSize)(state.numBins, actx.sampleRate));
   }
   init();
 
   // Reference state outside of animation loop
-  var refMaxFreq = settings.MAX_FREQ;
-  var refMinFreq = settings.MIN_FREQ;
+  var refMaxFreq = state.maxFreq;
+  var refMinFreq = state.minFreq;
   var refTime = Date.now();
   var elapsedTime = 0;
   var imageData = void 0;
@@ -2900,17 +2850,17 @@ module.exports = function (canvas, ctx, settings) {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.putImageData(imageData, 0, 1);
 
-    // Reset audio fields when user changes settings.
-    if (analyser.fftSize !== parseInt(settings.FFT_SIZE) || analyser.smoothingTimeConstant !== settings.SMOOTHING || refMaxFreq !== settings.MAX_FREQ || refMinFreq !== settings.MIN_FREQ) {
-      refMaxFreq = settings.MAX_FREQ;
-      refMinFreq = settings.MIN_FREQ;
+    // Reset audio fields when user changes state.
+    if (analyser.fftSize !== parseInt(state.fftSize) || analyser.smoothingTimeConstant !== state.smoothing || refMaxFreq !== state.maxFreq || refMinFreq !== state.minFreq) {
+      refMaxFreq = state.maxFreq;
+      refMinFreq = state.minFreq;
       init();
     }
 
     // Slow down fft refresh rate from default 15-18 ms
     // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it
     elapsedTime = Date.now() - refTime;
-    if (elapsedTime >= settings.REFRESH_RATE) {
+    if (elapsedTime >= state.refreshRate) {
       refTime = Date.now();
 
       // Fill up the data array
@@ -2929,9 +2879,9 @@ module.exports = function (canvas, ctx, settings) {
         ctx.strokeStyle = 'hsl(' + hue + ', ' + sat + ', ' + lit + '%)';
 
         // Logarithmic Display
-        if (settings.DISPLAY === 'Logarithmic') {
+        if (state.display === 'Logarithmic') {
           ctx.moveTo(prevLogPos, 0);
-          prevLogPos = settings.LOG_POS(i * dataBinInfo.binSize, canvas.width);
+          prevLogPos = state.logPositionX(i * dataBinInfo.binSize, canvas.width);
           ctx.lineTo(prevLogPos, 0);
         }
         // Linear Display
@@ -2952,6 +2902,68 @@ module.exports = function (canvas, ctx, settings) {
 
   animate();
 };
+
+/***/ }),
+
+/***/ "./src/js/state.js":
+/*!*************************!*\
+  !*** ./src/js/state.js ***!
+  \*************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var State = function () {
+  function State() {
+    _classCallCheck(this, State);
+
+    this.refreshRate = 100;
+    this.minFreq = 80;
+    this.maxFreq = 16000;
+    this.fftSize = 16384; // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
+    this.smoothing = 0.0; // 0.0-1.0
+    this.display = 'Logarithmic';
+    this.canvasOrigin = { x: 0, y: 35 };
+    this.paused = false;
+  }
+
+  _createClass(State, [{
+    key: 'logPositionX',
+    value: function logPositionX(freq, width) {
+      return Math.floor((Math.log(freq) / Math.LN10 - this.minLog) / this.logRange * width);
+    }
+  }, {
+    key: 'logFreq',
+    value: function logFreq(pos, width) {
+      return Math.pow(Math.E, Math.LN10 * (this.minLog + pos * this.logRange / width));
+    }
+  }, {
+    key: 'numBins',
+    get: function get() {
+      return this.fftSize / 2;
+    }
+  }, {
+    key: 'minLog',
+    get: function get() {
+      return Math.log(this.minFreq) / Math.LN10;
+    }
+  }, {
+    key: 'logRange',
+    get: function get() {
+      return Math.log(this.maxFreq) / Math.LN10 - this.minLog;
+    }
+  }]);
+
+  return State;
+}();
+
+module.exports = { State: State };
 
 /***/ })
 

@@ -1,6 +1,6 @@
 import { binSize, getBinInfo } from './audioUtils.js'
 
-module.exports = function(canvas, ctx, settings) {
+module.exports = function(canvas, ctx, state) {
   // Audio Setup
   const ContextConstructor = window.AudioContext || window.webkitAudioContext
   const actx = new ContextConstructor()
@@ -16,21 +16,21 @@ module.exports = function(canvas, ctx, settings) {
   let data
   let dataBinInfo
   function init() {
-    analyser.fftSize = parseInt(settings.FFT_SIZE)
-    analyser.smoothingTimeConstant = settings.SMOOTHING
+    analyser.fftSize = parseInt(state.fftSize)
+    analyser.smoothingTimeConstant = state.smoothing
     data = new Uint8Array(analyser.frequencyBinCount)
     dataBinInfo = getBinInfo(
-      settings.MIN_FREQ,
-      settings.MAX_FREQ,
-      settings.NUM_BINS,
-      binSize(settings.NUM_BINS, actx.sampleRate)
+      state.minFreq,
+      state.maxFreq,
+      state.numBins,
+      binSize(state.numBins, actx.sampleRate)
     )
   }
   init()
 
   // Reference state outside of animation loop
-  let refMaxFreq = settings.MAX_FREQ
-  let refMinFreq = settings.MIN_FREQ
+  let refMaxFreq = state.maxFreq
+  let refMinFreq = state.minFreq
   let refTime = Date.now()
   let elapsedTime = 0
   let imageData
@@ -45,22 +45,22 @@ module.exports = function(canvas, ctx, settings) {
     ctx.fillRect(0, 0, canvas.width, canvas.height)
     ctx.putImageData(imageData, 0, 1)
 
-    // Reset audio fields when user changes settings.
+    // Reset audio fields when user changes state.
     if (
-      analyser.fftSize !== parseInt(settings.FFT_SIZE) ||
-      analyser.smoothingTimeConstant !== settings.SMOOTHING ||
-      refMaxFreq !== settings.MAX_FREQ ||
-      refMinFreq !== settings.MIN_FREQ
+      analyser.fftSize !== parseInt(state.fftSize) ||
+      analyser.smoothingTimeConstant !== state.smoothing ||
+      refMaxFreq !== state.maxFreq ||
+      refMinFreq !== state.minFreq
     ) {
-      refMaxFreq = settings.MAX_FREQ
-      refMinFreq = settings.MIN_FREQ
+      refMaxFreq = state.maxFreq
+      refMinFreq = state.minFreq
       init()
     }
 
     // Slow down fft refresh rate from default 15-18 ms
     // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it
     elapsedTime = Date.now() - refTime
-    if (elapsedTime >= settings.REFRESH_RATE) {
+    if (elapsedTime >= state.refreshRate) {
       refTime = Date.now()
 
       // Fill up the data array
@@ -79,9 +79,9 @@ module.exports = function(canvas, ctx, settings) {
         ctx.strokeStyle = `hsl(${hue}, ${sat}, ${lit}%)`
 
         // Logarithmic Display
-        if (settings.DISPLAY === 'Logarithmic') {
+        if (state.display === 'Logarithmic') {
           ctx.moveTo(prevLogPos, 0)
-          prevLogPos = settings.LOG_POS(i * dataBinInfo.binSize, canvas.width)
+          prevLogPos = state.logPositionX(i * dataBinInfo.binSize, canvas.width)
           ctx.lineTo(prevLogPos, 0)
         }
         // Linear Display
