@@ -1,4 +1,6 @@
 import spectrogram from './spectrogram.js'
+import foreground from './foreground.js'
+import { Settings } from './settings.js'
 
 const HEADER_SIZE = 35
 const start = document.querySelector('#start')
@@ -6,6 +8,9 @@ const start = document.querySelector('#start')
 // Audio Context is requires user input to enable so browsers don't block as spam
 start.addEventListener('click', event => {
   start.style.display = 'none'
+
+  // Instantiate Settings
+  let settings = new Settings()
 
   // Canvas setup
   const spectrogramCanvas = document.querySelector('canvas#spectrogram')
@@ -22,5 +27,5 @@ start.addEventListener('click', event => {
     ctx.fillRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height)
   })
 
-  spectrogram(spectrogramCanvas, ctx)
+  spectrogram(spectrogramCanvas, ctx, settings)
 })

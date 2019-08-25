@@ -2676,6 +2676,12 @@ var _spectrogram = __webpack_require__(/*! ./spectrogram.js */ "./src/js/spectro
 
 var _spectrogram2 = _interopRequireDefault(_spectrogram);
 
+var _foreground = __webpack_require__(/*! ./foreground.js */ "./src/js/foreground.js");
+
+var _foreground2 = _interopRequireDefault(_foreground);
+
+var _settings = __webpack_require__(/*! ./settings.js */ "./src/js/settings.js");
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var HEADER_SIZE = 35;
@@ -2684,6 +2690,9 @@ var start = document.querySelector('#start');
 // Audio Context is requires user input to enable so browsers don't block as spam
 start.addEventListener('click', function (event) {
   start.style.display = 'none';
+
+  // Instantiate Settings
+  var settings = new _settings.Settings();
 
   // Canvas setup
   var spectrogramCanvas = document.querySelector('canvas#spectrogram');
@@ -2700,8 +2709,22 @@ start.addEventListener('click', function (event) {
     ctx.fillRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height);
   });
 
-  (0, _spectrogram2.default)(spectrogramCanvas, ctx);
+  (0, _spectrogram2.default)(spectrogramCanvas, ctx, settings);
 });
+
+/***/ }),
+
+/***/ "./src/js/foreground.js":
+/*!******************************!*\
+  !*** ./src/js/foreground.js ***!
+  \******************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function (canvas, ctx) {};
 
 /***/ }),
 
@@ -2744,23 +2767,43 @@ module.exports = function (SETTINGS) {
 "use strict";
 
 
-module.exports = {
-  REFRESH_RATE: 100,
-  MIN_FREQ: 80,
-  MAX_FREQ: 16000,
-  FFT_SIZE: 16384, // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
-  SMOOTHING: 0.0, // 0.0-1.0
-  DISPLAY: 'Logarithmic',
-  get NUM_BINS() {
-    return this.FFT_SIZE / 2;
-  },
-  get MIN_LOG() {
-    return Math.log(this.MIN_FREQ) / Math.log(10);
-  },
-  get LOG_RANGE() {
-    return Math.log(this.MAX_FREQ) / Math.log(10) - this.MIN_LOG;
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Settings = function () {
+  function Settings() {
+    _classCallCheck(this, Settings);
+
+    this.REFRESH_RATE = 100;
+    this.MIN_FREQ = 80;
+    this.MAX_FREQ = 16000;
+    this.FFT_SIZE = 16384; // 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768
+    this.SMOOTHING = 0.0; // 0.0-1.0
+    this.DISPLAY = 'Logarithmic';
   }
-};
+
+  _createClass(Settings, [{
+    key: 'NUM_BINS',
+    get: function get() {
+      return this.FFT_SIZE / 2;
+    }
+  }, {
+    key: 'MIN_LOG',
+    get: function get() {
+      return Math.log(this.MIN_FREQ) / Math.log(10);
+    }
+  }, {
+    key: 'LOG_RANGE',
+    get: function get() {
+      return Math.log(this.MAX_FREQ) / Math.log(10) - this.MIN_LOG;
+    }
+  }]);
+
+  return Settings;
+}();
+
+module.exports = { Settings: Settings };
 
 /***/ }),
 
@@ -2780,15 +2823,11 @@ var _gui2 = _interopRequireDefault(_gui);
 
 var _audioUtils = __webpack_require__(/*! ./audioUtils.js */ "./src/js/audioUtils.js");
 
-var _settings = __webpack_require__(/*! ./settings.js */ "./src/js/settings.js");
-
-var _settings2 = _interopRequireDefault(_settings);
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-module.exports = function (canvas, ctx) {
+module.exports = function (canvas, ctx, settings) {
   // GUI Setup
-  (0, _gui2.default)(_settings2.default);
+  (0, _gui2.default)(settings);
 
   // Audio Setup
   var ContextConstructor = window.AudioContext || window.webkitAudioContext;
@@ -2805,16 +2844,16 @@ module.exports = function (canvas, ctx) {
   var data = void 0;
   var dataBinInfo = void 0;
   function init() {
-    analyser.fftSize = parseInt(_settings2.default.FFT_SIZE);
-    analyser.smoothingTimeConstant = _settings2.default.SMOOTHING;
+    analyser.fftSize = parseInt(settings.FFT_SIZE);
+    analyser.smoothingTimeConstant = settings.SMOOTHING;
     data = new Uint8Array(analyser.frequencyBinCount);
-    dataBinInfo = (0, _audioUtils.getBinInfo)(_settings2.default.MIN_FREQ, _settings2.default.MAX_FREQ, _settings2.default.NUM_BINS, (0, _audioUtils.binSize)(_settings2.default.NUM_BINS, actx.sampleRate));
+    dataBinInfo = (0, _audioUtils.getBinInfo)(settings.MIN_FREQ, settings.MAX_FREQ, settings.NUM_BINS, (0, _audioUtils.binSize)(settings.NUM_BINS, actx.sampleRate));
   }
   init();
 
   // Reference state outside of animation loop
-  var refMaxFreq = _settings2.default.MAX_FREQ;
-  var refMinFreq = _settings2.default.MIN_FREQ;
+  var refMaxFreq = settings.MAX_FREQ;
+  var refMinFreq = settings.MIN_FREQ;
   var refTime = Date.now();
   var elapsedTime = 0;
   var imageData = void 0;
@@ -2830,16 +2869,16 @@ module.exports = function (canvas, ctx) {
     ctx.putImageData(imageData, 0, 1);
 
     // Reset audio fields when user changes settings.
-    if (analyser.fftSize !== parseInt(_settings2.default.FFT_SIZE) || analyser.smoothingTimeConstant !== _settings2.default.SMOOTHING || refMaxFreq !== _settings2.default.MAX_FREQ || refMinFreq !== _settings2.default.MIN_FREQ) {
-      refMaxFreq = _settings2.default.MAX_FREQ;
-      refMinFreq = _settings2.default.MIN_FREQ;
+    if (analyser.fftSize !== parseInt(settings.FFT_SIZE) || analyser.smoothingTimeConstant !== settings.SMOOTHING || refMaxFreq !== settings.MAX_FREQ || refMinFreq !== settings.MIN_FREQ) {
+      refMaxFreq = settings.MAX_FREQ;
+      refMinFreq = settings.MIN_FREQ;
       init();
     }
 
     // Slow down fft refresh rate from default 15-18 ms
     // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it
     elapsedTime = Date.now() - refTime;
-    if (elapsedTime >= _settings2.default.REFRESH_RATE) {
+    if (elapsedTime >= settings.REFRESH_RATE) {
       refTime = Date.now();
 
       // Fill up the data array
@@ -2858,9 +2897,9 @@ module.exports = function (canvas, ctx) {
         ctx.strokeStyle = 'hsl(' + hue + ', ' + sat + ', ' + lit + '%)';
 
         // Logarithmic Display
-        if (_settings2.default.DISPLAY === 'Logarithmic') {
+        if (settings.DISPLAY === 'Logarithmic') {
           ctx.moveTo(prevLogPos, 0);
-          prevLogPos = (0, _audioUtils.logPosition)(i * dataBinInfo.binSize, _settings2.default.MIN_LOG, _settings2.default.LOG_RANGE, canvas.width);
+          prevLogPos = (0, _audioUtils.logPosition)(i * dataBinInfo.binSize, settings.MIN_LOG, settings.LOG_RANGE, canvas.width);
           ctx.lineTo(prevLogPos, 0);
         }
         // Linear Display

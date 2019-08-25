@@ -1,8 +1,7 @@
 import gui from './gui.js'
 import { binSize, getBinInfo, logPosition } from './audioUtils.js'
-import settings from './settings.js'
 
-module.exports = function(canvas, ctx) {
+module.exports = function(canvas, ctx, settings) {
   // GUI Setup
   gui(settings)
 
