@@ -2676,6 +2676,10 @@ var _foreground = __webpack_require__(/*! ./foreground.js */ "./src/js/foregroun
 
 var _foreground2 = _interopRequireDefault(_foreground);
 
+var _mouse = __webpack_require__(/*! ./mouse.js */ "./src/js/mouse.js");
+
+var _mouse2 = _interopRequireDefault(_mouse);
+
 var _state = __webpack_require__(/*! ./state.js */ "./src/js/state.js");
 
 var _gui = __webpack_require__(/*! ./gui.js */ "./src/js/gui.js");
@@ -2698,11 +2702,11 @@ start.addEventListener('click', function (event) {
 
   // Spectrograph Canvas setup
   var spectrographCanvas = document.querySelector('canvas#spectrograph');
-  var spectrogramCTX = spectrographCanvas.getContext('2d');
+  var spectrographCTX = spectrographCanvas.getContext('2d');
   spectrographCanvas.height = window.innerHeight - state.canvasOrigin.y;
   spectrographCanvas.width = window.innerWidth;
-  spectrogramCTX.fillStyle = 'hsl(280, 100%, 10%)';
-  spectrogramCTX.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height);
+  spectrographCTX.fillStyle = 'hsl(280, 100%, 10%)';
+  spectrographCTX.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height);
 
   // Foreground Canvas setup
   var foregroundCanvas = document.querySelector('canvas#foreground');
@@ -2710,18 +2714,15 @@ start.addEventListener('click', function (event) {
   foregroundCanvas.height = window.innerHeight - state.canvasOrigin.y;
   foregroundCanvas.width = window.innerWidth;
 
-  // Clear canvases on resize
-  window.addEventListener('resize', function () {
-    spectrographCanvas.width = innerWidth;
-    spectrographCanvas.height = innerHeight;
-    foregroundCanvas.width = innerWidth;
-    foregroundCanvas.height = innerHeight;
-    spectrogramCTX.fillStyle = 'hsl(280, 100%, 10%)';
-    spectrogramCTX.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height);
-  });
+  // Mouse Canvas setup
+  var mouseCanvas = document.querySelector('canvas#mouse');
+  var mouseCTX = mouseCanvas.getContext('2d');
+  mouseCanvas.height = window.innerHeight - state.canvasOrigin.y;
+  mouseCanvas.width = window.innerWidth;
 
-  (0, _spectrograph2.default)(spectrographCanvas, spectrogramCTX, state);
+  (0, _spectrograph2.default)(spectrographCanvas, spectrographCTX, state);
   (0, _foreground2.default)(foregroundCanvas, foregroundCTX, state);
+  (0, _mouse2.default)(mouseCanvas, mouseCTX, state);
 });
 
 /***/ }),
@@ -2737,34 +2738,35 @@ start.addEventListener('click', function (event) {
 
 
 module.exports = function (canvas, ctx, state) {
-  var mouse = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
-    active: true
-  };
-
-  canvas.addEventListener('mouseenter', function (event) {
-    mouse.active = true;
+  var FONT_SIZE = 12;
+  window.addEventListener('resize', function () {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight - state.canvasOrigin.y;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawToggle();
   });
 
-  canvas.addEventListener('mouseleave', function (event) {
-    mouse.active = false;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-  });
-
-  canvas.addEventListener('mousemove', function (event) {
-    mouse.x = event.clientX;
-    mouse.y = event.clientY - state.canvasOrigin.y;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  function drawToggle() {
+    var text = state.paused ? 'Resume' : 'Pause';
+    state.toggleButton.x = canvas.width - 70;
+    state.toggleButton.y = canvas.height - 20;
+    ctx.clearRect(state.toggleButton.x, state.toggleButton.y - FONT_SIZE, state.toggleButton.width, state.toggleButton.height);
     ctx.fillStyle = '#fff';
-    ctx.fillText(state.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' Hz', Math.floor(mouse.x), Math.floor(mouse.y + 30));
-  });
+    ctx.font = FONT_SIZE + 'px sans-serif';
+    ctx.fillText(text, state.toggleButton.x, state.toggleButton.y);
+  }
 
   document.addEventListener('keyup', function (e) {
     if (e.keyCode === 32 || e.keyCode === 75) {
       state.toggleAnimation();
     }
   });
+
+  document.addEventListener('toggleAnimation', function (e) {
+    drawToggle();
+  });
+
+  drawToggle();
 };
 
 /***/ }),
@@ -2798,6 +2800,64 @@ module.exports = function (state) {
 
 /***/ }),
 
+/***/ "./src/js/mouse.js":
+/*!*************************!*\
+  !*** ./src/js/mouse.js ***!
+  \*************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function (canvas, ctx, state) {
+  window.addEventListener('resize', function () {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight - state.canvasOrigin.y;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+
+  var mouse = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    active: true
+  };
+  var hoveringToggle = false;
+
+  canvas.addEventListener('mouseenter', function (event) {
+    mouse.active = true;
+  });
+
+  canvas.addEventListener('mouseleave', function (event) {
+    mouse.active = false;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  });
+
+  canvas.addEventListener('mousemove', function (event) {
+    mouse.x = event.clientX;
+    mouse.y = event.clientY;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(state.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' Hz', Math.floor(mouse.x), Math.floor(mouse.y));
+
+    if (mouse.x >= state.toggleButton.x && mouse.x <= state.toggleButton.x + state.toggleButton.width && mouse.y >= state.toggleButton.y + state.toggleButton.height && mouse.y <= state.toggleButton.y + state.toggleButton.height * 2) {
+      hoveringToggle = true;
+      document.body.style.cursor = 'pointer';
+    } else {
+      hoveringToggle = false;
+      document.body.style.cursor = 'default';
+    }
+  });
+
+  canvas.addEventListener('click', function (event) {
+    if (hoveringToggle) {
+      state.toggleAnimation();
+    }
+  });
+};
+
+/***/ }),
+
 /***/ "./src/js/spectrograph.js":
 /*!********************************!*\
   !*** ./src/js/spectrograph.js ***!
@@ -2811,6 +2871,14 @@ module.exports = function (state) {
 var _audioUtils = __webpack_require__(/*! ./audioUtils.js */ "./src/js/audioUtils.js");
 
 module.exports = function (canvas, ctx, state) {
+  // Clear canvases on resize
+  window.addEventListener('resize', function () {
+    canvas.width = innerWidth;
+    canvas.height = innerHeight - state.canvasOrigin.y;
+    ctx.fillStyle = 'hsl(280, 100%, 10%)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  });
+
   // Audio Setup
   var ContextConstructor = window.AudioContext || window.webkitAudioContext;
   var actx = new ContextConstructor();
@@ -2956,6 +3024,7 @@ var State = function () {
     this.canvasOrigin = { x: 0, y: 35 };
     this.paused = false;
     this.toggleEvent = new Event('toggleAnimation');
+    this.toggleButton = { width: 50, height: 20, x: 0, y: 0 };
   }
 
   _createClass(State, [{

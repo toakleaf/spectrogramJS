@@ -32,14 +32,19 @@
       h2 {
         margin: 0;
       }
-      #foreground {
+      #mouse {
         position: absolute;
         z-index: 0;
         left: 0px;
       }
-      #spectrograph {
+      #foreground {
         position: absolute;
         z-index: -1;
+        left: 0px;
+      }
+      #spectrograph {
+        position: absolute;
+        z-index: -2;
         left: 0px;
       }
       .dg.main .close-button.close-bottom {
@@ -53,6 +58,7 @@
       <h2>Spectrograph JS</h2>
     </menu>
     <h1 id="start">Click to Start</h1>
+    <canvas id="mouse"> </canvas>
     <canvas id="foreground"> </canvas>
     <canvas id="spectrograph"> </canvas>
   </body>

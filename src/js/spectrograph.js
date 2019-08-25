@@ -1,6 +1,14 @@
 import { binSize, getBinInfo } from './audioUtils.js'
 
 module.exports = function(canvas, ctx, state) {
+  // Clear canvases on resize
+  window.addEventListener('resize', () => {
+    canvas.width = innerWidth
+    canvas.height = innerHeight - state.canvasOrigin.y
+    ctx.fillStyle = 'hsl(280, 100%, 10%)'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+  })
+
   // Audio Setup
   const ContextConstructor = window.AudioContext || window.webkitAudioContext
   const actx = new ContextConstructor()

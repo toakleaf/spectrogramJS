@@ -9,6 +9,7 @@ class State {
     this.canvasOrigin = { x: 0, y: 35 }
     this.paused = false
     this.toggleEvent = new Event('toggleAnimation')
+    this.toggleButton = { width: 50, height: 20, x: 0, y: 0 }
   }
 
   get numBins() {

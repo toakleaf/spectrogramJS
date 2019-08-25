@@ -1,5 +1,6 @@
 import spectrograph from './spectrograph.js'
 import foreground from './foreground.js'
+import mouse from './mouse.js'
 import { State } from './state.js'
 import gui from './gui.js'
 
@@ -17,11 +18,11 @@ start.addEventListener('click', event => {
 
   // Spectrograph Canvas setup
   const spectrographCanvas = document.querySelector('canvas#spectrograph')
-  const spectrogramCTX = spectrographCanvas.getContext('2d')
+  const spectrographCTX = spectrographCanvas.getContext('2d')
   spectrographCanvas.height = window.innerHeight - state.canvasOrigin.y
   spectrographCanvas.width = window.innerWidth
-  spectrogramCTX.fillStyle = 'hsl(280, 100%, 10%)'
-  spectrogramCTX.fillRect(
+  spectrographCTX.fillStyle = 'hsl(280, 100%, 10%)'
+  spectrographCTX.fillRect(
     0,
     0,
     spectrographCanvas.width,
@@ -34,21 +35,13 @@ start.addEventListener('click', event => {
   foregroundCanvas.height = window.innerHeight - state.canvasOrigin.y
   foregroundCanvas.width = window.innerWidth
 
-  // Clear canvases on resize
-  window.addEventListener('resize', () => {
-    spectrographCanvas.width = innerWidth
-    spectrographCanvas.height = innerHeight
-    foregroundCanvas.width = innerWidth
-    foregroundCanvas.height = innerHeight
-    spectrogramCTX.fillStyle = 'hsl(280, 100%, 10%)'
-    spectrogramCTX.fillRect(
-      0,
-      0,
-      spectrographCanvas.width,
-      spectrographCanvas.height
-    )
-  })
+  // Mouse Canvas setup
+  const mouseCanvas = document.querySelector('canvas#mouse')
+  const mouseCTX = mouseCanvas.getContext('2d')
+  mouseCanvas.height = window.innerHeight - state.canvasOrigin.y
+  mouseCanvas.width = window.innerWidth
 
-  spectrograph(spectrographCanvas, spectrogramCTX, state)
+  spectrograph(spectrographCanvas, spectrographCTX, state)
   foreground(foregroundCanvas, foregroundCTX, state)
+  mouse(mouseCanvas, mouseCTX, state)
 })
