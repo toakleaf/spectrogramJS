@@ -80,7 +80,7 @@ export default function(canvas, ctx, state) {
     // Slow down fft refresh rate from default 15-18 ms
     // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it
     elapsedTime = Date.now() - refTime
-    if (elapsedTime >= state.refreshRate) {
+    if (elapsedTime >= state.windowLength) {
       refTime = Date.now()
 
       // Fill up the data array

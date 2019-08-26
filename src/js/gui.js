@@ -3,7 +3,7 @@ import * as dat from 'dat.gui'
 export default function(state) {
   const gui = new dat.GUI()
   gui.closed = true
-  gui.add(state, 'refreshRate', 15, 500).name('Refresh Rate')
+  gui.add(state, 'windowLength', 15, 500).name('Window Length')
   gui.add(state, 'minFreq', 20, 1000).name('Min Frequency')
   gui.add(state, 'maxFreq', 1000, 22000).name('Max Frequency')
   gui
