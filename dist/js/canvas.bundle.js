@@ -5762,8 +5762,7 @@ function () {
   }]);
 
   return State;
-}(); // module.exports = { State }
-
+}();
 
 /* harmony default export */ __webpack_exports__["default"] = (State);
 

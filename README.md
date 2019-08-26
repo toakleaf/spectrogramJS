@@ -6,6 +6,8 @@ I had a free day, so I thought I'd mess around with the [Web Audio API](https://
 
 Not a bad day's work for my first at bat with this API.
 
+I am hoping to use this API for visual reference while I'm experimenting with the various pitch detection algorithms I'm developing for my next adventure.
+
 ## TODO:
 
 1.  Maybe fix the toolbar styling to be a bit more mobile friendly.
