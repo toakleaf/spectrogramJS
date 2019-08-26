@@ -1,6 +1,6 @@
 import { binSize, getBinInfo } from './audioUtils.js'
 
-module.exports = function(canvas, ctx, state) {
+export default function(canvas, ctx, state) {
   // Clear canvases on resize
   window.addEventListener('resize', () => {
     canvas.width = innerWidth

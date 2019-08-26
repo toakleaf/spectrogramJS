@@ -2632,10 +2632,7 @@ var index = {
   !*** ./src/js/audioUtils.js ***!
   \******************************/
 /*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
+/***/ (function(module, exports) {
 
 function binSize(numBins, sampleRate) {
   var maxFreq = sampleRate / 2;
@@ -2654,7 +2651,10 @@ function getBinInfo(min, max, numBins, binSize) {
   };
 }
 
-module.exports = { binSize: binSize, getBinInfo: getBinInfo };
+module.exports = {
+  binSize: binSize,
+  getBinInfo: getBinInfo
+};
 
 /***/ }),
 
@@ -2662,67 +2662,51 @@ module.exports = { binSize: binSize, getBinInfo: getBinInfo };
 /*!**************************!*\
   !*** ./src/js/canvas.js ***!
   \**************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/*! no exports provided */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _spectrograph_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./spectrograph.js */ "./src/js/spectrograph.js");
+/* harmony import */ var _foreground_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./foreground.js */ "./src/js/foreground.js");
+/* harmony import */ var _foreground_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_foreground_js__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _mouse_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./mouse.js */ "./src/js/mouse.js");
+/* harmony import */ var _mouse_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_mouse_js__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _state_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./state.js */ "./src/js/state.js");
+/* harmony import */ var _gui_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./gui.js */ "./src/js/gui.js");
 
 
-var _spectrograph = __webpack_require__(/*! ./spectrograph.js */ "./src/js/spectrograph.js");
 
-var _spectrograph2 = _interopRequireDefault(_spectrograph);
 
-var _foreground = __webpack_require__(/*! ./foreground.js */ "./src/js/foreground.js");
 
-var _foreground2 = _interopRequireDefault(_foreground);
+var start = document.querySelector('#start'); // Audio Context is requires user input to enable so browsers don't block as spam
 
-var _mouse = __webpack_require__(/*! ./mouse.js */ "./src/js/mouse.js");
-
-var _mouse2 = _interopRequireDefault(_mouse);
-
-var _state = __webpack_require__(/*! ./state.js */ "./src/js/state.js");
-
-var _gui = __webpack_require__(/*! ./gui.js */ "./src/js/gui.js");
-
-var _gui2 = _interopRequireDefault(_gui);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var start = document.querySelector('#start');
-
-// Audio Context is requires user input to enable so browsers don't block as spam
 start.addEventListener('click', function (event) {
-  start.style.display = 'none';
+  start.style.display = 'none'; // Instantiate State
 
-  // Instantiate State
-  var state = new _state.State();
+  var state = new _state_js__WEBPACK_IMPORTED_MODULE_3__["default"](); // GUI Setup
 
-  // GUI Setup
-  (0, _gui2.default)(state);
+  Object(_gui_js__WEBPACK_IMPORTED_MODULE_4__["default"])(state); // Spectrograph Canvas setup
 
-  // Spectrograph Canvas setup
   var spectrographCanvas = document.querySelector('canvas#spectrograph');
   var spectrographCTX = spectrographCanvas.getContext('2d');
   spectrographCanvas.height = window.innerHeight - state.canvasOrigin.y;
   spectrographCanvas.width = window.innerWidth;
   spectrographCTX.fillStyle = 'hsl(280, 100%, 10%)';
-  spectrographCTX.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height);
+  spectrographCTX.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height); // Foreground Canvas setup
 
-  // Foreground Canvas setup
   var foregroundCanvas = document.querySelector('canvas#foreground');
   var foregroundCTX = foregroundCanvas.getContext('2d');
   foregroundCanvas.height = window.innerHeight - state.canvasOrigin.y;
-  foregroundCanvas.width = window.innerWidth;
+  foregroundCanvas.width = window.innerWidth; // Mouse Canvas setup
 
-  // Mouse Canvas setup
   var mouseCanvas = document.querySelector('canvas#mouse');
   var mouseCTX = mouseCanvas.getContext('2d');
   mouseCanvas.height = window.innerHeight - state.canvasOrigin.y;
   mouseCanvas.width = window.innerWidth;
-
-  (0, _spectrograph2.default)(spectrographCanvas, spectrographCTX, state);
-  (0, _foreground2.default)(foregroundCanvas, foregroundCTX, state);
-  (0, _mouse2.default)(mouseCanvas, mouseCTX, state);
+  Object(_spectrograph_js__WEBPACK_IMPORTED_MODULE_0__["default"])(spectrographCanvas, spectrographCTX, state);
+  _foreground_js__WEBPACK_IMPORTED_MODULE_1___default()(foregroundCanvas, foregroundCTX, state);
+  _mouse_js__WEBPACK_IMPORTED_MODULE_2___default()(mouseCanvas, mouseCTX, state);
 });
 
 /***/ }),
@@ -2732,10 +2716,7 @@ start.addEventListener('click', function (event) {
   !*** ./src/js/foreground.js ***!
   \******************************/
 /*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
+/***/ (function(module, exports) {
 
 module.exports = function (canvas, ctx, state) {
   var FONT_SIZE = 12;
@@ -2752,7 +2733,7 @@ module.exports = function (canvas, ctx, state) {
     state.toggleButton.y = canvas.height - 20;
     ctx.clearRect(state.toggleButton.x, state.toggleButton.y - FONT_SIZE, state.toggleButton.width, state.toggleButton.height);
     ctx.fillStyle = '#fff';
-    ctx.font = FONT_SIZE + 'px sans-serif';
+    ctx.font = "".concat(FONT_SIZE, "px sans-serif");
     ctx.fillText(text, state.toggleButton.x, state.toggleButton.y);
   }
 
@@ -2761,7 +2742,6 @@ module.exports = function (canvas, ctx, state) {
       state.toggleAnimation();
     }
   });
-
   document.addEventListener('toggleAnimation', function (e) {
     drawToggle();
   });
@@ -2781,20 +2761,15 @@ module.exports = function (canvas, ctx, state) {
 /*!***********************!*\
   !*** ./src/js/gui.js ***!
   \***********************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var dat_gui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! dat.gui */ "./node_modules/dat.gui/build/dat.gui.module.js");
 
-
-var _dat = __webpack_require__(/*! dat.gui */ "./node_modules/dat.gui/build/dat.gui.module.js");
-
-var dat = _interopRequireWildcard(_dat);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-module.exports = function (state) {
-  var gui = new dat.GUI();
+/* harmony default export */ __webpack_exports__["default"] = (function (state) {
+  var gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__["GUI"]();
   gui.closed = true;
   gui.add(state, 'refreshRate', 15, 500).name('Refresh Rate');
   gui.add(state, 'minFreq', 20, 1000).name('Min Frequency');
@@ -2803,7 +2778,7 @@ module.exports = function (state) {
   gui.add(state, 'smoothing', 0.0, 1.0).step(0.05).name('FFT Smoothing');
   gui.add(state, 'display', ['Logarithmic', 'Linear']).name('Display Type');
   gui.add(state, 'noteGrid').name('Show Note Grid');
-};
+});
 
 /***/ }),
 
@@ -2812,10 +2787,7 @@ module.exports = function (state) {
   !*** ./src/js/mouse.js ***!
   \*************************/
 /*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
+/***/ (function(module, exports) {
 
 module.exports = function (canvas, ctx, state) {
   window.addEventListener('resize', function () {
@@ -2823,31 +2795,34 @@ module.exports = function (canvas, ctx, state) {
     canvas.height = innerHeight - state.canvasOrigin.y;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
-
   var mouse = {
     x: canvas.width / 2,
     y: canvas.height / 2,
     active: true
   };
   var freq = state.minFreq;
+  var note = null;
   var hoveringToggle = false;
-
   canvas.addEventListener('mouseenter', function (event) {
     mouse.active = true;
   });
-
   canvas.addEventListener('mouseleave', function (event) {
     mouse.active = false;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
-
   canvas.addEventListener('mousemove', function (event) {
     mouse.x = event.clientX;
     mouse.y = event.clientY;
     freq = state.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2);
+    note = state.noteName(freq);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#fff';
-    ctx.fillText('C4' + ' : ' + freq.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') + ' Hz', Math.floor(mouse.x), Math.floor(mouse.y));
+
+    if (note.note) {
+      ctx.fillText("".concat(note.note, " : ").concat(note.cents > 0 ? '+' : '').concat(note.cents, " cents"), Math.floor(mouse.x), Math.floor(mouse.y));
+    }
+
+    ctx.fillText("".concat(freq.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','), " Hz"), Math.floor(mouse.x), Math.floor(mouse.y + 12));
 
     if (mouse.x >= state.toggleButton.x && mouse.x <= state.toggleButton.x + state.toggleButton.width && mouse.y >= state.toggleButton.y + state.toggleButton.height && mouse.y <= state.toggleButton.y + state.toggleButton.height * 2) {
       hoveringToggle = true;
@@ -2857,7 +2832,6 @@ module.exports = function (canvas, ctx, state) {
       document.body.style.cursor = 'default';
     }
   });
-
   canvas.addEventListener('click', function (event) {
     if (hoveringToggle) {
       state.toggleAnimation();
@@ -2872,10 +2846,7 @@ module.exports = function (canvas, ctx, state) {
   !*** ./src/js/notes.js ***!
   \*************************/
 /*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
+/***/ (function(module, exports) {
 
 module.exports = {
   '432': [{
@@ -5486,99 +5457,91 @@ module.exports = {
 /*!********************************!*\
   !*** ./src/js/spectrograph.js ***!
   \********************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _audioUtils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./audioUtils.js */ "./src/js/audioUtils.js");
+/* harmony import */ var _audioUtils_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_audioUtils_js__WEBPACK_IMPORTED_MODULE_0__);
 
-
-var _audioUtils = __webpack_require__(/*! ./audioUtils.js */ "./src/js/audioUtils.js");
-
-module.exports = function (canvas, ctx, state) {
+/* harmony default export */ __webpack_exports__["default"] = (function (canvas, ctx, state) {
   // Clear canvases on resize
   window.addEventListener('resize', function () {
     canvas.width = innerWidth;
     canvas.height = innerHeight - state.canvasOrigin.y;
     ctx.fillStyle = 'hsl(280, 100%, 10%)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-  });
+  }); // Audio Setup
 
-  // Audio Setup
   var ContextConstructor = window.AudioContext || window.webkitAudioContext;
   var actx = new ContextConstructor();
-  var analyser = actx.createAnalyser();
+  var analyser = actx.createAnalyser(); // Get mic input
 
-  // Get mic input
-  navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+  navigator.mediaDevices.getUserMedia({
+    audio: true
+  }).then(function (stream) {
     var source = actx.createMediaStreamSource(stream);
     source.connect(analyser);
-  });
+  }); // Initialize data array
 
-  // Initialize data array
-  var data = void 0;
-  var dataBinInfo = void 0;
+  var data;
+  var dataBinInfo;
+
   function init() {
     analyser.fftSize = parseInt(state.fftSize);
     analyser.smoothingTimeConstant = state.smoothing;
     data = new Uint8Array(analyser.frequencyBinCount);
-    dataBinInfo = (0, _audioUtils.getBinInfo)(state.minFreq, state.maxFreq, state.numBins, (0, _audioUtils.binSize)(state.numBins, actx.sampleRate));
+    dataBinInfo = Object(_audioUtils_js__WEBPACK_IMPORTED_MODULE_0__["getBinInfo"])(state.minFreq, state.maxFreq, state.numBins, Object(_audioUtils_js__WEBPACK_IMPORTED_MODULE_0__["binSize"])(state.numBins, actx.sampleRate));
   }
-  init();
 
-  // Local state for reference outside animation loop
+  init(); // Local state for reference outside animation loop
+
   var refMaxFreq = state.maxFreq;
   var refMinFreq = state.minFreq;
   var refTime = Date.now();
   var elapsedTime = 0;
-  var imageData = void 0;
-  var requestId = void 0;
+  var imageData;
+  var requestId; // Animation Loop
 
-  // Animation Loop
   function animate() {
     requestId = undefined;
-    start();
+    start(); // To animate downward movement, save all but bottom pixel row, clear, and redraw down one pixel
 
-    // To animate downward movement, save all but bottom pixel row, clear, and redraw down one pixel
     imageData = ctx.getImageData(0, 0, canvas.width, canvas.height - 1);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.putImageData(imageData, 0, 1);
+    ctx.putImageData(imageData, 0, 1); // Reset audio fields when user changes state.
 
-    // Reset audio fields when user changes state.
     if (analyser.fftSize !== parseInt(state.fftSize) || analyser.smoothingTimeConstant !== state.smoothing || refMaxFreq !== state.maxFreq || refMinFreq !== state.minFreq) {
       refMaxFreq = state.maxFreq;
       refMinFreq = state.minFreq;
       init();
-    }
-
-    // Slow down fft refresh rate from default 15-18 ms
+    } // Slow down fft refresh rate from default 15-18 ms
     // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it
+
+
     elapsedTime = Date.now() - refTime;
+
     if (elapsedTime >= state.refreshRate) {
-      refTime = Date.now();
+      refTime = Date.now(); // Fill up the data array
 
-      // Fill up the data array
       analyser.getByteFrequencyData(data);
+      var prevLogPos = 0; // Draw data points on canvas
 
-      var prevLogPos = 0;
-
-      // Draw data points on canvas
       for (var i = dataBinInfo.low; i <= dataBinInfo.high; i++) {
         var rat = data[i] / 255;
         var hue = Math.round((rat * 120 + 280) % 360);
         var sat = '100%';
         var lit = 10 + 70 * rat;
-
         ctx.beginPath();
-        ctx.strokeStyle = 'hsl(' + hue + ', ' + sat + ', ' + lit + '%)';
+        ctx.strokeStyle = "hsl(".concat(hue, ", ").concat(sat, ", ").concat(lit, "%)"); // Logarithmic Display
 
-        // Logarithmic Display
         if (state.display === 'Logarithmic') {
           ctx.moveTo(prevLogPos, 0);
           prevLogPos = state.logPositionX(i * dataBinInfo.binSize, canvas.width);
           ctx.lineTo(prevLogPos, 0);
-        }
-        // Linear Display
+        } // Linear Display
         else {
             ctx.moveTo(i * canvas.width / dataBinInfo.range, 0);
             ctx.lineTo(canvas.width / dataBinInfo.range + i * canvas.width / dataBinInfo.range, 0);
@@ -5605,9 +5568,9 @@ module.exports = function (canvas, ctx, state) {
       window.cancelAnimationFrame(requestId);
       requestId = undefined;
     }
-  }
+  } // Listen for custom toggleAnimation event declared in state.js
 
-  // Listen for custom toggleAnimation event declared in state.js
+
   document.addEventListener('toggleAnimation', function (e) {
     if (state.paused) {
       stop();
@@ -5615,9 +5578,8 @@ module.exports = function (canvas, ctx, state) {
       start();
     }
   });
-
   animate();
-};
+});
 
 /***/ }),
 
@@ -5625,23 +5587,30 @@ module.exports = function (canvas, ctx, state) {
 /*!*************************!*\
   !*** ./src/js/state.js ***!
   \*************************/
-/*! no static exports found */
-/***/ (function(module, exports, __webpack_require__) {
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _notes_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./notes.js */ "./src/js/notes.js");
+/* harmony import */ var _notes_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_notes_js__WEBPACK_IMPORTED_MODULE_0__);
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
 
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _notes = __webpack_require__(/*! ./notes.js */ "./src/js/notes.js");
-
-var _notes2 = _interopRequireDefault(_notes);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var State = function () {
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+var State =
+/*#__PURE__*/
+function () {
   function State() {
     _classCallCheck(this, State);
 
@@ -5649,43 +5618,56 @@ var State = function () {
     this.minFreq = 80;
     this.maxFreq = 16000;
     this.fftSize = 16384; // ['32', '64', '128', '256', '512', '1024', '2048', '4096', '8192', '16384', '32768']
+
     this.smoothing = 0.0; // 0.0-1.0
+
     this.display = 'Logarithmic';
     this.noteGrid = true;
     this.refPitch = '440'; // ['432', '434', '436', '438', '440', '442', '444', '446']
-    this.canvasOrigin = { x: 0, y: 35 };
+
+    this.canvasOrigin = {
+      x: 0,
+      y: 35
+    };
     this.paused = false;
     this.toggleEvent = new Event('toggleAnimation');
-    this.toggleButton = { width: 50, height: 20, x: 0, y: 0 };
-    this.notes = _notes2.default;
+    this.toggleButton = {
+      width: 50,
+      height: 20,
+      x: 0,
+      y: 0
+    };
+    this.notes = _notes_js__WEBPACK_IMPORTED_MODULE_0___default.a;
   }
 
   _createClass(State, [{
-    key: 'logPositionX',
+    key: "logPositionX",
     value: function logPositionX(freq, width) {
       return Math.floor((Math.log(freq) / Math.LN10 - this.minLog) / this.logRange * width);
     }
   }, {
-    key: 'logFreq',
+    key: "logFreq",
     value: function logFreq(pos, width) {
       return Math.pow(Math.E, Math.LN10 * (this.minLog + pos * this.logRange / width));
     }
   }, {
-    key: 'centDiff',
+    key: "centDiff",
     value: function centDiff(freqA, freqB) {
-      return 1200 * Math.log2(freqB / freqA);
+      // 100 cents = 1 semitone
+      return Math.floor(1200 * Math.log2(freqB / freqA));
     }
   }, {
-    key: 'noteName',
+    key: "noteName",
     value: function noteName(freq) {
+      // Binary search to find note within 50 cents
       var start = 0;
-      var end = _notes2.default[this.refPitch].length - 1;
+      var end = _notes_js__WEBPACK_IMPORTED_MODULE_0___default.a[this.refPitch].length - 1;
       var current = Math.floor(end / 2);
-      var currentFreq = void 0;
-      var diff = void 0;
+      var currentFreq;
+      var diff;
+      var result;
 
       while (current > start && current < end) {
-        console.log(start, current, end);
         currentFreq = this.notes[this.refPitch][current].frequency;
         diff = this.centDiff(freq, currentFreq);
 
@@ -5696,41 +5678,49 @@ var State = function () {
           start = current;
           current = Math.floor((end - start) / 2 + start);
         } else {
-          return this.notes[this.refPitch][current];
+          // result = { cents: diff, ...this.notes[this.refPitch][current] }
+          result = this.notes[this.refPitch][current];
+          return _objectSpread({}, result, {
+            cents: diff
+          });
         }
       }
-      return { frequency: null, note: '' };
-    }
 
-    // Create a pause event for communication between canvas layers
+      return {
+        frequency: null,
+        note: '',
+        cents: null
+      };
+    } // Create a pause event for communication between canvas layers
 
   }, {
-    key: 'toggleAnimation',
+    key: "toggleAnimation",
     value: function toggleAnimation() {
       this.paused = !this.paused;
       document.dispatchEvent(this.toggleEvent);
     }
   }, {
-    key: 'numBins',
+    key: "numBins",
     get: function get() {
       return this.fftSize / 2;
     }
   }, {
-    key: 'minLog',
+    key: "minLog",
     get: function get() {
       return Math.log(this.minFreq) / Math.LN10;
     }
   }, {
-    key: 'logRange',
+    key: "logRange",
     get: function get() {
       return Math.log(this.maxFreq) / Math.LN10 - this.minLog;
     }
   }]);
 
   return State;
-}();
+}(); // module.exports = { State }
 
-module.exports = { State: State };
+
+/* harmony default export */ __webpack_exports__["default"] = (State);
 
 /***/ })
 

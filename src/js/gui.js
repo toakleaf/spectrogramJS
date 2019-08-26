@@ -1,6 +1,6 @@
 import * as dat from 'dat.gui'
 
-module.exports = function(state) {
+export default function(state) {
   const gui = new dat.GUI()
   gui.closed = true
   gui.add(state, 'refreshRate', 15, 500).name('Refresh Rate')

@@ -1,7 +1,7 @@
 import spectrograph from './spectrograph.js'
 import foreground from './foreground.js'
 import mouse from './mouse.js'
-import { State } from './state.js'
+import State from './state.js'
 import gui from './gui.js'
 
 const start = document.querySelector('#start')

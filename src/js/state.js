@@ -43,18 +43,20 @@ class State {
   }
 
   centDiff(freqA, freqB) {
-    return 1200 * Math.log2(freqB / freqA)
+    // 100 cents = 1 semitone
+    return Math.floor(1200 * Math.log2(freqB / freqA))
   }
 
   noteName(freq) {
+    // Binary search to find note within 50 cents
     let start = 0
     let end = notes[this.refPitch].length - 1
     let current = Math.floor(end / 2)
     let currentFreq
     let diff
+    let result
 
     while (current > start && current < end) {
-      console.log(start, current, end)
       currentFreq = this.notes[this.refPitch][current].frequency
       diff = this.centDiff(freq, currentFreq)
 
@@ -65,10 +67,12 @@ class State {
         start = current
         current = Math.floor((end - start) / 2 + start)
       } else {
-        return this.notes[this.refPitch][current]
+        // result = { cents: diff, ...this.notes[this.refPitch][current] }
+        result = this.notes[this.refPitch][current]
+        return { ...result, cents: diff }
       }
     }
-    return { frequency: null, note: '' }
+    return { frequency: null, note: '', cents: null }
   }
 
   // Create a pause event for communication between canvas layers
@@ -78,4 +82,6 @@ class State {
   }
 }
 
-module.exports = { State }
+// module.exports = { State }
+
+export default State

@@ -11,6 +11,7 @@ module.exports = function(canvas, ctx, state) {
     active: true
   }
   let freq = state.minFreq
+  let note = null
   let hoveringToggle = false
 
   canvas.addEventListener('mouseenter', event => {
@@ -26,12 +27,20 @@ module.exports = function(canvas, ctx, state) {
     mouse.x = event.clientX
     mouse.y = event.clientY
     freq = state.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2)
+    note = state.noteName(freq)
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.fillStyle = '#fff'
+    if (note.note) {
+      ctx.fillText(
+        `${note.note} : ${note.cents > 0 ? '+' : ''}${note.cents} cents`,
+        Math.floor(mouse.x),
+        Math.floor(mouse.y)
+      )
+    }
     ctx.fillText(
-      `${'C4'} : ${freq.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} Hz`,
+      `${freq.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} Hz`,
       Math.floor(mouse.x),
-      Math.floor(mouse.y)
+      Math.floor(mouse.y + 12)
     )
 
     if (
