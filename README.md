@@ -27,3 +27,7 @@ I am hoping to use this API for visual reference while I'm experimenting with th
         npm start
 
 Should open up automatically at http://localhost:3000
+
+## Instructions not included
+
+1.  Hit the spacebar or 'k' key to pause
