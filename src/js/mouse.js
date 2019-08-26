@@ -26,23 +26,6 @@ module.exports = function(canvas, ctx, state) {
   canvas.addEventListener('mousemove', event => {
     mouse.x = event.clientX
     mouse.y = event.clientY
-    freq = state.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2)
-    note = state.noteName(freq)
-    ctx.clearRect(0, 0, canvas.width, canvas.height)
-    ctx.fillStyle = '#fff'
-    if (note.note) {
-      ctx.fillText(
-        `${note.note} : ${note.cents > 0 ? '+' : ''}${note.cents} cents`,
-        Math.floor(mouse.x),
-        Math.floor(mouse.y)
-      )
-    }
-    ctx.fillText(
-      `${freq.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} Hz`,
-      Math.floor(mouse.x),
-      Math.floor(mouse.y + 12)
-    )
-
     if (
       mouse.x >= state.toggleButton.x &&
       mouse.x <= state.toggleButton.x + state.toggleButton.width &&
@@ -55,6 +38,27 @@ module.exports = function(canvas, ctx, state) {
       hoveringToggle = false
       document.body.style.cursor = 'default'
     }
+    if (state.display !== 'Logarithmic' || !state.pointerNotes) {
+      state.pointerNotes = false
+      return
+    }
+    freq = state.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2)
+    note = state.noteName(freq)
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    ctx.fillStyle = '#fff'
+    ctx.font = `${state.fontSize}px sans-serif`
+    if (note.note) {
+      ctx.fillText(
+        `${note.note} : ${note.cents > 0 ? '+' : ''}${note.cents} cents`,
+        Math.floor(mouse.x),
+        Math.floor(mouse.y)
+      )
+    }
+    ctx.fillText(
+      `${freq.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} Hz`,
+      Math.floor(mouse.x),
+      Math.floor(mouse.y + state.fontSize + 1)
+    )
   })
 
   canvas.addEventListener('click', event => {

@@ -39,6 +39,9 @@ export default function(canvas, ctx, state) {
   // Local state for reference outside animation loop
   let refMaxFreq = state.maxFreq
   let refMinFreq = state.minFreq
+  let refDisplay = state.display
+  let refNoteGrid = state.noteGrid
+  let refPitch = state.refPitch
   let refTime = Date.now()
   let elapsedTime = 0
   let imageData
@@ -60,10 +63,17 @@ export default function(canvas, ctx, state) {
       analyser.fftSize !== parseInt(state.fftSize) ||
       analyser.smoothingTimeConstant !== state.smoothing ||
       refMaxFreq !== state.maxFreq ||
-      refMinFreq !== state.minFreq
+      refMinFreq !== state.minFreq ||
+      refDisplay !== state.display ||
+      refNoteGrid !== state.noteGrid ||
+      refPitch !== state.refPitch
     ) {
       refMaxFreq = state.maxFreq
       refMinFreq = state.minFreq
+      refDisplay = state.display
+      refNoteGrid = state.noteGrid
+      refPitch = state.refPitch
+      document.dispatchEvent(state.refreshEvent)
       init()
     }
 

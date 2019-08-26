@@ -2719,7 +2719,6 @@ start.addEventListener('click', function (event) {
 /***/ (function(module, exports) {
 
 module.exports = function (canvas, ctx, state) {
-  var FONT_SIZE = 12;
   window.addEventListener('resize', function () {
     canvas.width = innerWidth;
     canvas.height = innerHeight - state.canvasOrigin.y;
@@ -2732,9 +2731,9 @@ module.exports = function (canvas, ctx, state) {
     var text = state.paused ? 'Resume' : 'Pause';
     state.toggleButton.x = canvas.width - 70;
     state.toggleButton.y = canvas.height - 20;
-    ctx.clearRect(state.toggleButton.x, state.toggleButton.y - FONT_SIZE, state.toggleButton.width, state.toggleButton.height);
+    ctx.clearRect(state.toggleButton.x, state.toggleButton.y - state.fontSize, state.toggleButton.width, state.toggleButton.height);
     ctx.fillStyle = '#fff';
-    ctx.font = "".concat(FONT_SIZE, "px sans-serif");
+    ctx.font = "".concat(state.fontSize, "px sans-serif");
     ctx.fillText(text, state.toggleButton.x, state.toggleButton.y);
   }
 
@@ -2746,9 +2745,20 @@ module.exports = function (canvas, ctx, state) {
   document.addEventListener('toggleAnimation', function (e) {
     drawToggle();
   });
+  document.addEventListener('refresh', function (e) {
+    drawNoteGrid();
+    drawToggle();
+  });
 
   function drawNoteGrid() {
     var x;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if (state.display !== 'Logarithmic' || !state.noteGrid) {
+      state.noteGrid = false;
+      return;
+    }
+
     state.notes[state.refPitch].forEach(function (note) {
       if (note.frequency > state.minFreq && note.frequency < state.maxFreq) {
         x = state.logPositionX(note.frequency, canvas.width);
@@ -2756,6 +2766,8 @@ module.exports = function (canvas, ctx, state) {
 
         if (note.note[1] === '#') {
           ctx.strokeStyle = 'rgba(150, 150, 150, 0.08)';
+        } else if (note.note[0] === 'C') {
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
         } else {
           ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
         }
@@ -2794,7 +2806,9 @@ __webpack_require__.r(__webpack_exports__);
   gui.add(state, 'fftSize', [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]).name('FFT Size');
   gui.add(state, 'smoothing', 0.0, 1.0).step(0.05).name('FFT Smoothing');
   gui.add(state, 'display', ['Logarithmic', 'Linear']).name('Display Type');
-  gui.add(state, 'noteGrid').name('Show Note Grid');
+  gui.add(state, 'noteGrid').name('Show Note Grid').listen();
+  gui.add(state, 'pointerNotes').name('Show Pointer Notes').listen();
+  gui.add(state, 'refPitch', ['432', '434', '436', '438', '440', '442', '444', '446']).name('Reference Pitch');
 });
 
 /***/ }),
@@ -2830,16 +2844,6 @@ module.exports = function (canvas, ctx, state) {
   canvas.addEventListener('mousemove', function (event) {
     mouse.x = event.clientX;
     mouse.y = event.clientY;
-    freq = state.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2);
-    note = state.noteName(freq);
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = '#fff';
-
-    if (note.note) {
-      ctx.fillText("".concat(note.note, " : ").concat(note.cents > 0 ? '+' : '').concat(note.cents, " cents"), Math.floor(mouse.x), Math.floor(mouse.y));
-    }
-
-    ctx.fillText("".concat(freq.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','), " Hz"), Math.floor(mouse.x), Math.floor(mouse.y + 12));
 
     if (mouse.x >= state.toggleButton.x && mouse.x <= state.toggleButton.x + state.toggleButton.width && mouse.y >= state.toggleButton.y + state.toggleButton.height && mouse.y <= state.toggleButton.y + state.toggleButton.height * 2) {
       hoveringToggle = true;
@@ -2848,6 +2852,23 @@ module.exports = function (canvas, ctx, state) {
       hoveringToggle = false;
       document.body.style.cursor = 'default';
     }
+
+    if (state.display !== 'Logarithmic' || !state.pointerNotes) {
+      state.pointerNotes = false;
+      return;
+    }
+
+    freq = state.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2);
+    note = state.noteName(freq);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#fff';
+    ctx.font = "".concat(state.fontSize, "px sans-serif");
+
+    if (note.note) {
+      ctx.fillText("".concat(note.note, " : ").concat(note.cents > 0 ? '+' : '').concat(note.cents, " cents"), Math.floor(mouse.x), Math.floor(mouse.y));
+    }
+
+    ctx.fillText("".concat(freq.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','), " Hz"), Math.floor(mouse.x), Math.floor(mouse.y + state.fontSize + 1));
   });
   canvas.addEventListener('click', function (event) {
     if (hoveringToggle) {
@@ -5516,6 +5537,9 @@ __webpack_require__.r(__webpack_exports__);
 
   var refMaxFreq = state.maxFreq;
   var refMinFreq = state.minFreq;
+  var refDisplay = state.display;
+  var refNoteGrid = state.noteGrid;
+  var refPitch = state.refPitch;
   var refTime = Date.now();
   var elapsedTime = 0;
   var imageData;
@@ -5530,9 +5554,13 @@ __webpack_require__.r(__webpack_exports__);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.putImageData(imageData, 0, 1); // Reset audio fields when user changes state.
 
-    if (analyser.fftSize !== parseInt(state.fftSize) || analyser.smoothingTimeConstant !== state.smoothing || refMaxFreq !== state.maxFreq || refMinFreq !== state.minFreq) {
+    if (analyser.fftSize !== parseInt(state.fftSize) || analyser.smoothingTimeConstant !== state.smoothing || refMaxFreq !== state.maxFreq || refMinFreq !== state.minFreq || refDisplay !== state.display || refNoteGrid !== state.noteGrid || refPitch !== state.refPitch) {
       refMaxFreq = state.maxFreq;
       refMinFreq = state.minFreq;
+      refDisplay = state.display;
+      refNoteGrid = state.noteGrid;
+      refPitch = state.refPitch;
+      document.dispatchEvent(state.refreshEvent);
       init();
     } // Slow down fft refresh rate from default 15-18 ms
     // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it
@@ -5633,13 +5661,14 @@ function () {
 
     this.refreshRate = 100;
     this.minFreq = 80;
-    this.maxFreq = 16000;
+    this.maxFreq = 10000;
     this.fftSize = 16384; // ['32', '64', '128', '256', '512', '1024', '2048', '4096', '8192', '16384', '32768']
 
     this.smoothing = 0.0; // 0.0-1.0
 
     this.display = 'Logarithmic';
     this.noteGrid = true;
+    this.pointerNotes = true;
     this.refPitch = '440'; // ['432', '434', '436', '438', '440', '442', '444', '446']
 
     this.canvasOrigin = {
@@ -5648,6 +5677,7 @@ function () {
     };
     this.paused = false;
     this.toggleEvent = new Event('toggleAnimation');
+    this.refreshEvent = new Event('refresh');
     this.toggleButton = {
       width: 50,
       height: 20,
@@ -5655,6 +5685,7 @@ function () {
       y: 0
     };
     this.notes = _notes_js__WEBPACK_IMPORTED_MODULE_0___default.a;
+    this.fontSize = 12;
   }
 
   _createClass(State, [{

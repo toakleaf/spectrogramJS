@@ -26,5 +26,24 @@ export default function(state) {
     .step(0.05)
     .name('FFT Smoothing')
   gui.add(state, 'display', ['Logarithmic', 'Linear']).name('Display Type')
-  gui.add(state, 'noteGrid').name('Show Note Grid')
+  gui
+    .add(state, 'noteGrid')
+    .name('Show Note Grid')
+    .listen()
+  gui
+    .add(state, 'pointerNotes')
+    .name('Show Pointer Notes')
+    .listen()
+  gui
+    .add(state, 'refPitch', [
+      '432',
+      '434',
+      '436',
+      '438',
+      '440',
+      '442',
+      '444',
+      '446'
+    ])
+    .name('Reference Pitch')
 }
