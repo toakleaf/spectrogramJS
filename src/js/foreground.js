@@ -4,6 +4,7 @@ module.exports = function(canvas, ctx, state) {
     canvas.width = innerWidth
     canvas.height = innerHeight - state.canvasOrigin.y
     ctx.clearRect(0, 0, canvas.width, canvas.height)
+    drawNoteGrid()
     drawToggle()
   })
 
@@ -33,8 +34,22 @@ module.exports = function(canvas, ctx, state) {
   })
 
   function drawNoteGrid() {
-    // console.log(state.centDiff(466.16, 440))
-    console.log(state.noteName(440))
+    let x
+    state.notes[state.refPitch].forEach(note => {
+      if (note.frequency > state.minFreq && note.frequency < state.maxFreq) {
+        x = state.logPositionX(note.frequency, canvas.width)
+        ctx.beginPath()
+        if (note.note[1] === '#') {
+          ctx.strokeStyle = 'rgba(150, 150, 150, 0.08)'
+        } else {
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'
+        }
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, canvas.height)
+        ctx.stroke()
+        ctx.closePath()
+      }
+    })
   }
 
   drawNoteGrid()

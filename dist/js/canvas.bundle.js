@@ -2724,6 +2724,7 @@ module.exports = function (canvas, ctx, state) {
     canvas.width = innerWidth;
     canvas.height = innerHeight - state.canvasOrigin.y;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawNoteGrid();
     drawToggle();
   });
 
@@ -2747,8 +2748,24 @@ module.exports = function (canvas, ctx, state) {
   });
 
   function drawNoteGrid() {
-    // console.log(state.centDiff(466.16, 440))
-    console.log(state.noteName(440));
+    var x;
+    state.notes[state.refPitch].forEach(function (note) {
+      if (note.frequency > state.minFreq && note.frequency < state.maxFreq) {
+        x = state.logPositionX(note.frequency, canvas.width);
+        ctx.beginPath();
+
+        if (note.note[1] === '#') {
+          ctx.strokeStyle = 'rgba(150, 150, 150, 0.08)';
+        } else {
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        }
+
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+        ctx.closePath();
+      }
+    });
   }
 
   drawNoteGrid();
@@ -5661,11 +5678,10 @@ function () {
     value: function noteName(freq) {
       // Binary search to find note within 50 cents
       var start = 0;
-      var end = _notes_js__WEBPACK_IMPORTED_MODULE_0___default.a[this.refPitch].length - 1;
+      var end = this.notes[this.refPitch].length - 1;
       var current = Math.floor(end / 2);
       var currentFreq;
       var diff;
-      var result;
 
       while (current > start && current < end) {
         currentFreq = this.notes[this.refPitch][current].frequency;
@@ -5678,9 +5694,7 @@ function () {
           start = current;
           current = Math.floor((end - start) / 2 + start);
         } else {
-          // result = { cents: diff, ...this.notes[this.refPitch][current] }
-          result = this.notes[this.refPitch][current];
-          return _objectSpread({}, result, {
+          return _objectSpread({}, this.notes[this.refPitch][current], {
             cents: diff
           });
         }

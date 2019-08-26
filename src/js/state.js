@@ -50,11 +50,10 @@ class State {
   noteName(freq) {
     // Binary search to find note within 50 cents
     let start = 0
-    let end = notes[this.refPitch].length - 1
+    let end = this.notes[this.refPitch].length - 1
     let current = Math.floor(end / 2)
     let currentFreq
     let diff
-    let result
 
     while (current > start && current < end) {
       currentFreq = this.notes[this.refPitch][current].frequency
@@ -67,9 +66,7 @@ class State {
         start = current
         current = Math.floor((end - start) / 2 + start)
       } else {
-        // result = { cents: diff, ...this.notes[this.refPitch][current] }
-        result = this.notes[this.refPitch][current]
-        return { ...result, cents: diff }
+        return { ...this.notes[this.refPitch][current], cents: diff }
       }
     }
     return { frequency: null, note: '', cents: null }
