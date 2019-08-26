@@ -5661,7 +5661,7 @@ function () {
 
     this.refreshRate = 100;
     this.minFreq = 80;
-    this.maxFreq = 10000;
+    this.maxFreq = 8000;
     this.fftSize = 16384; // ['32', '64', '128', '256', '512', '1024', '2048', '4096', '8192', '16384', '32768']
 
     this.smoothing = 0.0; // 0.0-1.0
