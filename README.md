@@ -10,13 +10,7 @@ Not a bad day's work for my first at bat with this API.
 
 1.  Maybe fix the toolbar styling to be a bit more mobile friendly.
 
-2.  Add vertical note line overlays option for easy pitch reference.
-
-3.  Add text display tied to cursor location that gives frequency info.
-
-4.  Add a pause button?
-
-5.  Add a print feature?
+2.  Add a image download feature?
 
 ## Getting Started
 
