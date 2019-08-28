@@ -1,30 +1,30 @@
-module.exports = function(canvas, ctx, state) {
+module.exports = function(canvas, ctx, store) {
   window.addEventListener('resize', () => {
     canvas.width = innerWidth
-    canvas.height = innerHeight - state.canvasOrigin.y
+    canvas.height = innerHeight - store.canvasOrigin.y
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     drawNoteGrid()
     drawToggle()
   })
 
   function drawToggle() {
-    let text = state.paused ? 'Resume' : 'Pause'
-    state.toggleButton.x = canvas.width - 70
-    state.toggleButton.y = canvas.height - 20
+    let text = store.paused ? 'Resume' : 'Pause'
+    store.toggleButton.x = canvas.width - 70
+    store.toggleButton.y = canvas.height - 20
     ctx.clearRect(
-      state.toggleButton.x,
-      state.toggleButton.y - state.fontSize,
-      state.toggleButton.width,
-      state.toggleButton.height
+      store.toggleButton.x,
+      store.toggleButton.y - store.fontSize,
+      store.toggleButton.width,
+      store.toggleButton.height
     )
     ctx.fillStyle = '#fff'
-    ctx.font = `${state.fontSize}px sans-serif`
-    ctx.fillText(text, state.toggleButton.x, state.toggleButton.y)
+    ctx.font = `${store.fontSize}px sans-serif`
+    ctx.fillText(text, store.toggleButton.x, store.toggleButton.y)
   }
 
   document.addEventListener('keyup', function(e) {
     if (e.keyCode === 32 || e.keyCode === 75) {
-      state.toggleAnimation()
+      store.toggleAnimation()
     }
   })
 
@@ -40,13 +40,13 @@ module.exports = function(canvas, ctx, state) {
   function drawNoteGrid() {
     let x
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-    if (state.display !== 'Logarithmic' || !state.noteGrid) {
-      state.noteGrid = false
+    if (store.display !== 'Logarithmic' || !store.noteGrid) {
+      store.noteGrid = false
       return
     }
-    state.notes[state.refPitch].forEach(note => {
-      if (note.frequency > state.minFreq && note.frequency < state.maxFreq) {
-        x = state.logPositionX(note.frequency, canvas.width)
+    store.notes[store.refPitch].forEach(note => {
+      if (note.frequency > store.minFreq && note.frequency < store.maxFreq) {
+        x = store.logPositionX(note.frequency, canvas.width)
         ctx.beginPath()
         if (note.note[1] === '#') {
           ctx.strokeStyle = 'rgba(150, 150, 150, 0.08)'

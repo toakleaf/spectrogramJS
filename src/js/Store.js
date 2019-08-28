@@ -1,6 +1,6 @@
 import notes from './notes.js'
 
-class State {
+class Store {
   constructor() {
     this.windowLength = 100
     this.minFreq = 80
@@ -82,4 +82,4 @@ class State {
   }
 }
 
-export default State
+export default Store

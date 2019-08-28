@@ -1,13 +1,13 @@
 import * as dat from 'dat.gui'
 
-export default function(state) {
+export default function(store) {
   const gui = new dat.GUI()
   gui.closed = true
-  gui.add(state, 'windowLength', 15, 500).name('Window Length')
-  gui.add(state, 'minFreq', 20, 1000).name('Min Frequency')
-  gui.add(state, 'maxFreq', 1000, 22000).name('Max Frequency')
+  gui.add(store, 'windowLength', 15, 500).name('Window Length')
+  gui.add(store, 'minFreq', 20, 1000).name('Min Frequency')
+  gui.add(store, 'maxFreq', 1000, 22000).name('Max Frequency')
   gui
-    .add(state, 'fftSize', [
+    .add(store, 'fftSize', [
       32,
       64,
       128,
@@ -22,20 +22,20 @@ export default function(state) {
     ])
     .name('FFT Size')
   gui
-    .add(state, 'smoothing', 0.0, 1.0)
+    .add(store, 'smoothing', 0.0, 1.0)
     .step(0.05)
     .name('FFT Smoothing')
-  gui.add(state, 'display', ['Logarithmic', 'Linear']).name('Display Type')
+  gui.add(store, 'display', ['Logarithmic', 'Linear']).name('Display Type')
   gui
-    .add(state, 'noteGrid')
+    .add(store, 'noteGrid')
     .name('Show Note Grid')
     .listen()
   gui
-    .add(state, 'pointerNotes')
+    .add(store, 'pointerNotes')
     .name('Show Pointer Notes')
     .listen()
   gui
-    .add(state, 'refPitch', [
+    .add(store, 'refPitch', [
       '432',
       '434',
       '436',

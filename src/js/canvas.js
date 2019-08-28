@@ -1,7 +1,7 @@
 import spectrograph from './spectrograph.js'
 import foreground from './foreground.js'
 import mouse from './mouse.js'
-import State from './state.js'
+import Store from './Store.js'
 import gui from './gui.js'
 
 const start = document.querySelector('#start')
@@ -10,16 +10,16 @@ const start = document.querySelector('#start')
 start.addEventListener('click', event => {
   start.style.display = 'none'
 
-  // Instantiate State
-  let state = new State()
+  // Instantiate Store
+  let store = new Store()
 
   // GUI Setup
-  gui(state)
+  gui(store)
 
   // Spectrograph Canvas setup
   const spectrographCanvas = document.querySelector('canvas#spectrograph')
   const spectrographCTX = spectrographCanvas.getContext('2d')
-  spectrographCanvas.height = window.innerHeight - state.canvasOrigin.y
+  spectrographCanvas.height = window.innerHeight - store.canvasOrigin.y
   spectrographCanvas.width = window.innerWidth
   spectrographCTX.fillStyle = 'hsl(280, 100%, 10%)'
   spectrographCTX.fillRect(
@@ -32,16 +32,16 @@ start.addEventListener('click', event => {
   // Foreground Canvas setup
   const foregroundCanvas = document.querySelector('canvas#foreground')
   const foregroundCTX = foregroundCanvas.getContext('2d')
-  foregroundCanvas.height = window.innerHeight - state.canvasOrigin.y
+  foregroundCanvas.height = window.innerHeight - store.canvasOrigin.y
   foregroundCanvas.width = window.innerWidth
 
   // Mouse Canvas setup
   const mouseCanvas = document.querySelector('canvas#mouse')
   const mouseCTX = mouseCanvas.getContext('2d')
-  mouseCanvas.height = window.innerHeight - state.canvasOrigin.y
+  mouseCanvas.height = window.innerHeight - store.canvasOrigin.y
   mouseCanvas.width = window.innerWidth
 
-  spectrograph(spectrographCanvas, spectrographCTX, state)
-  foreground(foregroundCanvas, foregroundCTX, state)
-  mouse(mouseCanvas, mouseCTX, state)
+  spectrograph(spectrographCanvas, spectrographCTX, store)
+  foreground(foregroundCanvas, foregroundCTX, store)
+  mouse(mouseCanvas, mouseCTX, store)
 })

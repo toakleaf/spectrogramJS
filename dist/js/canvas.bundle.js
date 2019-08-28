@@ -2627,6 +2627,146 @@ var index = {
 
 /***/ }),
 
+/***/ "./src/js/Store.js":
+/*!*************************!*\
+  !*** ./src/js/Store.js ***!
+  \*************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _notes_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./notes.js */ "./src/js/notes.js");
+/* harmony import */ var _notes_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_notes_js__WEBPACK_IMPORTED_MODULE_0__);
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+var Store =
+/*#__PURE__*/
+function () {
+  function Store() {
+    _classCallCheck(this, Store);
+
+    this.windowLength = 100;
+    this.minFreq = 80;
+    this.maxFreq = 8000;
+    this.fftSize = 16384; // ['32', '64', '128', '256', '512', '1024', '2048', '4096', '8192', '16384', '32768']
+
+    this.smoothing = 0.0; // 0.0-1.0
+
+    this.display = 'Logarithmic';
+    this.noteGrid = true;
+    this.pointerNotes = true;
+    this.refPitch = '440'; // ['432', '434', '436', '438', '440', '442', '444', '446']
+
+    this.canvasOrigin = {
+      x: 0,
+      y: 35
+    };
+    this.paused = false;
+    this.toggleEvent = new Event('toggleAnimation');
+    this.refreshEvent = new Event('refresh');
+    this.toggleButton = {
+      width: 50,
+      height: 20,
+      x: 0,
+      y: 0
+    };
+    this.notes = _notes_js__WEBPACK_IMPORTED_MODULE_0___default.a;
+    this.fontSize = 12;
+  }
+
+  _createClass(Store, [{
+    key: "logPositionX",
+    value: function logPositionX(freq, width) {
+      return Math.floor((Math.log(freq) / Math.LN10 - this.minLog) / this.logRange * width);
+    }
+  }, {
+    key: "logFreq",
+    value: function logFreq(pos, width) {
+      return Math.pow(Math.E, Math.LN10 * (this.minLog + pos * this.logRange / width));
+    }
+  }, {
+    key: "centDiff",
+    value: function centDiff(freqA, freqB) {
+      // 100 cents = 1 semitone
+      return Math.floor(1200 * Math.log2(freqB / freqA));
+    }
+  }, {
+    key: "noteName",
+    value: function noteName(freq) {
+      // Binary search to find note within 50 cents
+      var start = 0;
+      var end = this.notes[this.refPitch].length - 1;
+      var current = Math.floor(end / 2);
+      var currentFreq;
+      var diff;
+
+      while (current > start && current < end) {
+        currentFreq = this.notes[this.refPitch][current].frequency;
+        diff = this.centDiff(freq, currentFreq);
+
+        if (diff > 50) {
+          end = current;
+          current = Math.floor((end - start) / 2 + start);
+        } else if (diff < -50) {
+          start = current;
+          current = Math.floor((end - start) / 2 + start);
+        } else {
+          return _objectSpread({}, this.notes[this.refPitch][current], {
+            cents: diff
+          });
+        }
+      }
+
+      return {
+        frequency: null,
+        note: '',
+        cents: null
+      };
+    } // Create a pause event for communication between canvas layers
+
+  }, {
+    key: "toggleAnimation",
+    value: function toggleAnimation() {
+      this.paused = !this.paused;
+      document.dispatchEvent(this.toggleEvent);
+    }
+  }, {
+    key: "numBins",
+    get: function get() {
+      return this.fftSize / 2;
+    }
+  }, {
+    key: "minLog",
+    get: function get() {
+      return Math.log(this.minFreq) / Math.LN10;
+    }
+  }, {
+    key: "logRange",
+    get: function get() {
+      return Math.log(this.maxFreq) / Math.LN10 - this.minLog;
+    }
+  }]);
+
+  return Store;
+}();
+
+/* harmony default export */ __webpack_exports__["default"] = (Store);
+
+/***/ }),
+
 /***/ "./src/js/audioUtils.js":
 /*!******************************!*\
   !*** ./src/js/audioUtils.js ***!
@@ -2672,7 +2812,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _foreground_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_foreground_js__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _mouse_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./mouse.js */ "./src/js/mouse.js");
 /* harmony import */ var _mouse_js__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_mouse_js__WEBPACK_IMPORTED_MODULE_2__);
-/* harmony import */ var _state_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./state.js */ "./src/js/state.js");
+/* harmony import */ var _Store_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Store.js */ "./src/js/Store.js");
 /* harmony import */ var _gui_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./gui.js */ "./src/js/gui.js");
 
 
@@ -2682,31 +2822,31 @@ __webpack_require__.r(__webpack_exports__);
 var start = document.querySelector('#start'); // Audio Context is requires user input to enable so browsers don't block as spam
 
 start.addEventListener('click', function (event) {
-  start.style.display = 'none'; // Instantiate State
+  start.style.display = 'none'; // Instantiate Store
 
-  var state = new _state_js__WEBPACK_IMPORTED_MODULE_3__["default"](); // GUI Setup
+  var store = new _Store_js__WEBPACK_IMPORTED_MODULE_3__["default"](); // GUI Setup
 
-  Object(_gui_js__WEBPACK_IMPORTED_MODULE_4__["default"])(state); // Spectrograph Canvas setup
+  Object(_gui_js__WEBPACK_IMPORTED_MODULE_4__["default"])(store); // Spectrograph Canvas setup
 
   var spectrographCanvas = document.querySelector('canvas#spectrograph');
   var spectrographCTX = spectrographCanvas.getContext('2d');
-  spectrographCanvas.height = window.innerHeight - state.canvasOrigin.y;
+  spectrographCanvas.height = window.innerHeight - store.canvasOrigin.y;
   spectrographCanvas.width = window.innerWidth;
   spectrographCTX.fillStyle = 'hsl(280, 100%, 10%)';
   spectrographCTX.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height); // Foreground Canvas setup
 
   var foregroundCanvas = document.querySelector('canvas#foreground');
   var foregroundCTX = foregroundCanvas.getContext('2d');
-  foregroundCanvas.height = window.innerHeight - state.canvasOrigin.y;
+  foregroundCanvas.height = window.innerHeight - store.canvasOrigin.y;
   foregroundCanvas.width = window.innerWidth; // Mouse Canvas setup
 
   var mouseCanvas = document.querySelector('canvas#mouse');
   var mouseCTX = mouseCanvas.getContext('2d');
-  mouseCanvas.height = window.innerHeight - state.canvasOrigin.y;
+  mouseCanvas.height = window.innerHeight - store.canvasOrigin.y;
   mouseCanvas.width = window.innerWidth;
-  Object(_spectrograph_js__WEBPACK_IMPORTED_MODULE_0__["default"])(spectrographCanvas, spectrographCTX, state);
-  _foreground_js__WEBPACK_IMPORTED_MODULE_1___default()(foregroundCanvas, foregroundCTX, state);
-  _mouse_js__WEBPACK_IMPORTED_MODULE_2___default()(mouseCanvas, mouseCTX, state);
+  Object(_spectrograph_js__WEBPACK_IMPORTED_MODULE_0__["default"])(spectrographCanvas, spectrographCTX, store);
+  _foreground_js__WEBPACK_IMPORTED_MODULE_1___default()(foregroundCanvas, foregroundCTX, store);
+  _mouse_js__WEBPACK_IMPORTED_MODULE_2___default()(mouseCanvas, mouseCTX, store);
 });
 
 /***/ }),
@@ -2718,28 +2858,28 @@ start.addEventListener('click', function (event) {
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = function (canvas, ctx, state) {
+module.exports = function (canvas, ctx, store) {
   window.addEventListener('resize', function () {
     canvas.width = innerWidth;
-    canvas.height = innerHeight - state.canvasOrigin.y;
+    canvas.height = innerHeight - store.canvasOrigin.y;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawNoteGrid();
     drawToggle();
   });
 
   function drawToggle() {
-    var text = state.paused ? 'Resume' : 'Pause';
-    state.toggleButton.x = canvas.width - 70;
-    state.toggleButton.y = canvas.height - 20;
-    ctx.clearRect(state.toggleButton.x, state.toggleButton.y - state.fontSize, state.toggleButton.width, state.toggleButton.height);
+    var text = store.paused ? 'Resume' : 'Pause';
+    store.toggleButton.x = canvas.width - 70;
+    store.toggleButton.y = canvas.height - 20;
+    ctx.clearRect(store.toggleButton.x, store.toggleButton.y - store.fontSize, store.toggleButton.width, store.toggleButton.height);
     ctx.fillStyle = '#fff';
-    ctx.font = "".concat(state.fontSize, "px sans-serif");
-    ctx.fillText(text, state.toggleButton.x, state.toggleButton.y);
+    ctx.font = "".concat(store.fontSize, "px sans-serif");
+    ctx.fillText(text, store.toggleButton.x, store.toggleButton.y);
   }
 
   document.addEventListener('keyup', function (e) {
     if (e.keyCode === 32 || e.keyCode === 75) {
-      state.toggleAnimation();
+      store.toggleAnimation();
     }
   });
   document.addEventListener('toggleAnimation', function (e) {
@@ -2754,14 +2894,14 @@ module.exports = function (canvas, ctx, state) {
     var x;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (state.display !== 'Logarithmic' || !state.noteGrid) {
-      state.noteGrid = false;
+    if (store.display !== 'Logarithmic' || !store.noteGrid) {
+      store.noteGrid = false;
       return;
     }
 
-    state.notes[state.refPitch].forEach(function (note) {
-      if (note.frequency > state.minFreq && note.frequency < state.maxFreq) {
-        x = state.logPositionX(note.frequency, canvas.width);
+    store.notes[store.refPitch].forEach(function (note) {
+      if (note.frequency > store.minFreq && note.frequency < store.maxFreq) {
+        x = store.logPositionX(note.frequency, canvas.width);
         ctx.beginPath();
 
         if (note.note[1] === '#') {
@@ -2797,18 +2937,18 @@ module.exports = function (canvas, ctx, state) {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var dat_gui__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! dat.gui */ "./node_modules/dat.gui/build/dat.gui.module.js");
 
-/* harmony default export */ __webpack_exports__["default"] = (function (state) {
+/* harmony default export */ __webpack_exports__["default"] = (function (store) {
   var gui = new dat_gui__WEBPACK_IMPORTED_MODULE_0__["GUI"]();
   gui.closed = true;
-  gui.add(state, 'refreshRate', 15, 500).name('Refresh Rate');
-  gui.add(state, 'minFreq', 20, 1000).name('Min Frequency');
-  gui.add(state, 'maxFreq', 1000, 22000).name('Max Frequency');
-  gui.add(state, 'fftSize', [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]).name('FFT Size');
-  gui.add(state, 'smoothing', 0.0, 1.0).step(0.05).name('FFT Smoothing');
-  gui.add(state, 'display', ['Logarithmic', 'Linear']).name('Display Type');
-  gui.add(state, 'noteGrid').name('Show Note Grid').listen();
-  gui.add(state, 'pointerNotes').name('Show Pointer Notes').listen();
-  gui.add(state, 'refPitch', ['432', '434', '436', '438', '440', '442', '444', '446']).name('Reference Pitch');
+  gui.add(store, 'windowLength', 15, 500).name('Window Length');
+  gui.add(store, 'minFreq', 20, 1000).name('Min Frequency');
+  gui.add(store, 'maxFreq', 1000, 22000).name('Max Frequency');
+  gui.add(store, 'fftSize', [32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 32768]).name('FFT Size');
+  gui.add(store, 'smoothing', 0.0, 1.0).step(0.05).name('FFT Smoothing');
+  gui.add(store, 'display', ['Logarithmic', 'Linear']).name('Display Type');
+  gui.add(store, 'noteGrid').name('Show Note Grid').listen();
+  gui.add(store, 'pointerNotes').name('Show Pointer Notes').listen();
+  gui.add(store, 'refPitch', ['432', '434', '436', '438', '440', '442', '444', '446']).name('Reference Pitch');
 });
 
 /***/ }),
@@ -2820,10 +2960,10 @@ __webpack_require__.r(__webpack_exports__);
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = function (canvas, ctx, state) {
+module.exports = function (canvas, ctx, store) {
   window.addEventListener('resize', function () {
     canvas.width = innerWidth;
-    canvas.height = innerHeight - state.canvasOrigin.y;
+    canvas.height = innerHeight - store.canvasOrigin.y;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   });
   var mouse = {
@@ -2831,7 +2971,7 @@ module.exports = function (canvas, ctx, state) {
     y: canvas.height / 2,
     active: true
   };
-  var freq = state.minFreq;
+  var freq = store.minFreq;
   var note = null;
   var hoveringToggle = false;
   canvas.addEventListener('mouseenter', function (event) {
@@ -2845,7 +2985,7 @@ module.exports = function (canvas, ctx, state) {
     mouse.x = event.clientX;
     mouse.y = event.clientY;
 
-    if (mouse.x >= state.toggleButton.x && mouse.x <= state.toggleButton.x + state.toggleButton.width && mouse.y >= state.toggleButton.y + state.toggleButton.height && mouse.y <= state.toggleButton.y + state.toggleButton.height * 2) {
+    if (mouse.x >= store.toggleButton.x && mouse.x <= store.toggleButton.x + store.toggleButton.width && mouse.y >= store.toggleButton.y + store.toggleButton.height && mouse.y <= store.toggleButton.y + store.toggleButton.height * 2) {
       hoveringToggle = true;
       document.body.style.cursor = 'pointer';
     } else {
@@ -2853,26 +2993,26 @@ module.exports = function (canvas, ctx, state) {
       document.body.style.cursor = 'default';
     }
 
-    if (state.display !== 'Logarithmic' || !state.pointerNotes) {
-      state.pointerNotes = false;
+    if (store.display !== 'Logarithmic' || !store.pointerNotes) {
+      store.pointerNotes = false;
       return;
     }
 
-    freq = state.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2);
-    note = state.noteName(freq);
+    freq = store.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2);
+    note = store.noteName(freq);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillStyle = '#fff';
-    ctx.font = "".concat(state.fontSize, "px sans-serif");
+    ctx.font = "".concat(store.fontSize, "px sans-serif");
 
     if (note.note) {
       ctx.fillText("".concat(note.note, " : ").concat(note.cents > 0 ? '+' : '').concat(note.cents, " cents"), Math.floor(mouse.x), Math.floor(mouse.y));
     }
 
-    ctx.fillText("".concat(freq.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','), " Hz"), Math.floor(mouse.x), Math.floor(mouse.y + state.fontSize + 1));
+    ctx.fillText("".concat(freq.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','), " Hz"), Math.floor(mouse.x), Math.floor(mouse.y + store.fontSize + 1));
   });
   canvas.addEventListener('click', function (event) {
     if (hoveringToggle) {
-      state.toggleAnimation();
+      store.toggleAnimation();
     }
   });
 };
@@ -5503,11 +5643,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _audioUtils_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./audioUtils.js */ "./src/js/audioUtils.js");
 /* harmony import */ var _audioUtils_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_audioUtils_js__WEBPACK_IMPORTED_MODULE_0__);
 
-/* harmony default export */ __webpack_exports__["default"] = (function (canvas, ctx, state) {
+/* harmony default export */ __webpack_exports__["default"] = (function (canvas, ctx, store) {
   // Clear canvases on resize
   window.addEventListener('resize', function () {
     canvas.width = innerWidth;
-    canvas.height = innerHeight - state.canvasOrigin.y;
+    canvas.height = innerHeight - store.canvasOrigin.y;
     ctx.fillStyle = 'hsl(280, 100%, 10%)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }); // Audio Setup
@@ -5527,19 +5667,19 @@ __webpack_require__.r(__webpack_exports__);
   var dataBinInfo;
 
   function init() {
-    analyser.fftSize = parseInt(state.fftSize);
-    analyser.smoothingTimeConstant = state.smoothing;
+    analyser.fftSize = parseInt(store.fftSize);
+    analyser.smoothingTimeConstant = store.smoothing;
     data = new Uint8Array(analyser.frequencyBinCount);
-    dataBinInfo = Object(_audioUtils_js__WEBPACK_IMPORTED_MODULE_0__["getBinInfo"])(state.minFreq, state.maxFreq, state.numBins, Object(_audioUtils_js__WEBPACK_IMPORTED_MODULE_0__["binSize"])(state.numBins, actx.sampleRate));
+    dataBinInfo = Object(_audioUtils_js__WEBPACK_IMPORTED_MODULE_0__["getBinInfo"])(store.minFreq, store.maxFreq, store.numBins, Object(_audioUtils_js__WEBPACK_IMPORTED_MODULE_0__["binSize"])(store.numBins, actx.sampleRate));
   }
 
-  init(); // Local state for reference outside animation loop
+  init(); // Local store for reference outside animation loop
 
-  var refMaxFreq = state.maxFreq;
-  var refMinFreq = state.minFreq;
-  var refDisplay = state.display;
-  var refNoteGrid = state.noteGrid;
-  var refPitch = state.refPitch;
+  var refMaxFreq = store.maxFreq;
+  var refMinFreq = store.minFreq;
+  var refDisplay = store.display;
+  var refNoteGrid = store.noteGrid;
+  var refPitch = store.refPitch;
   var refTime = Date.now();
   var elapsedTime = 0;
   var imageData;
@@ -5552,15 +5692,15 @@ __webpack_require__.r(__webpack_exports__);
     imageData = ctx.getImageData(0, 0, canvas.width, canvas.height - 1);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.putImageData(imageData, 0, 1); // Reset audio fields when user changes state.
+    ctx.putImageData(imageData, 0, 1); // Reset audio fields when user changes store.
 
-    if (analyser.fftSize !== parseInt(state.fftSize) || analyser.smoothingTimeConstant !== state.smoothing || refMaxFreq !== state.maxFreq || refMinFreq !== state.minFreq || refDisplay !== state.display || refNoteGrid !== state.noteGrid || refPitch !== state.refPitch) {
-      refMaxFreq = state.maxFreq;
-      refMinFreq = state.minFreq;
-      refDisplay = state.display;
-      refNoteGrid = state.noteGrid;
-      refPitch = state.refPitch;
-      document.dispatchEvent(state.refreshEvent);
+    if (analyser.fftSize !== parseInt(store.fftSize) || analyser.smoothingTimeConstant !== store.smoothing || refMaxFreq !== store.maxFreq || refMinFreq !== store.minFreq || refDisplay !== store.display || refNoteGrid !== store.noteGrid || refPitch !== store.refPitch) {
+      refMaxFreq = store.maxFreq;
+      refMinFreq = store.minFreq;
+      refDisplay = store.display;
+      refNoteGrid = store.noteGrid;
+      refPitch = store.refPitch;
+      document.dispatchEvent(store.refreshEvent);
       init();
     } // Slow down fft refresh rate from default 15-18 ms
     // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it
@@ -5568,7 +5708,7 @@ __webpack_require__.r(__webpack_exports__);
 
     elapsedTime = Date.now() - refTime;
 
-    if (elapsedTime >= state.refreshRate) {
+    if (elapsedTime >= store.windowLength) {
       refTime = Date.now(); // Fill up the data array
 
       analyser.getByteFrequencyData(data);
@@ -5582,9 +5722,9 @@ __webpack_require__.r(__webpack_exports__);
         ctx.beginPath();
         ctx.strokeStyle = "hsl(".concat(hue, ", ").concat(sat, ", ").concat(lit, "%)"); // Logarithmic Display
 
-        if (state.display === 'Logarithmic') {
+        if (store.display === 'Logarithmic') {
           ctx.moveTo(prevLogPos, 0);
-          prevLogPos = state.logPositionX(i * dataBinInfo.binSize, canvas.width);
+          prevLogPos = store.logPositionX(i * dataBinInfo.binSize, canvas.width);
           ctx.lineTo(prevLogPos, 0);
         } // Linear Display
         else {
@@ -5613,11 +5753,11 @@ __webpack_require__.r(__webpack_exports__);
       window.cancelAnimationFrame(requestId);
       requestId = undefined;
     }
-  } // Listen for custom toggleAnimation event declared in state.js
+  } // Listen for custom toggleAnimation event declared in store.js
 
 
   document.addEventListener('toggleAnimation', function (e) {
-    if (state.paused) {
+    if (store.paused) {
       stop();
     } else {
       start();
@@ -5625,146 +5765,6 @@ __webpack_require__.r(__webpack_exports__);
   });
   animate();
 });
-
-/***/ }),
-
-/***/ "./src/js/state.js":
-/*!*************************!*\
-  !*** ./src/js/state.js ***!
-  \*************************/
-/*! exports provided: default */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _notes_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./notes.js */ "./src/js/notes.js");
-/* harmony import */ var _notes_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_notes_js__WEBPACK_IMPORTED_MODULE_0__);
-function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
-
-function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
-
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
-
-
-var State =
-/*#__PURE__*/
-function () {
-  function State() {
-    _classCallCheck(this, State);
-
-    this.refreshRate = 100;
-    this.minFreq = 80;
-    this.maxFreq = 8000;
-    this.fftSize = 16384; // ['32', '64', '128', '256', '512', '1024', '2048', '4096', '8192', '16384', '32768']
-
-    this.smoothing = 0.0; // 0.0-1.0
-
-    this.display = 'Logarithmic';
-    this.noteGrid = true;
-    this.pointerNotes = true;
-    this.refPitch = '440'; // ['432', '434', '436', '438', '440', '442', '444', '446']
-
-    this.canvasOrigin = {
-      x: 0,
-      y: 35
-    };
-    this.paused = false;
-    this.toggleEvent = new Event('toggleAnimation');
-    this.refreshEvent = new Event('refresh');
-    this.toggleButton = {
-      width: 50,
-      height: 20,
-      x: 0,
-      y: 0
-    };
-    this.notes = _notes_js__WEBPACK_IMPORTED_MODULE_0___default.a;
-    this.fontSize = 12;
-  }
-
-  _createClass(State, [{
-    key: "logPositionX",
-    value: function logPositionX(freq, width) {
-      return Math.floor((Math.log(freq) / Math.LN10 - this.minLog) / this.logRange * width);
-    }
-  }, {
-    key: "logFreq",
-    value: function logFreq(pos, width) {
-      return Math.pow(Math.E, Math.LN10 * (this.minLog + pos * this.logRange / width));
-    }
-  }, {
-    key: "centDiff",
-    value: function centDiff(freqA, freqB) {
-      // 100 cents = 1 semitone
-      return Math.floor(1200 * Math.log2(freqB / freqA));
-    }
-  }, {
-    key: "noteName",
-    value: function noteName(freq) {
-      // Binary search to find note within 50 cents
-      var start = 0;
-      var end = this.notes[this.refPitch].length - 1;
-      var current = Math.floor(end / 2);
-      var currentFreq;
-      var diff;
-
-      while (current > start && current < end) {
-        currentFreq = this.notes[this.refPitch][current].frequency;
-        diff = this.centDiff(freq, currentFreq);
-
-        if (diff > 50) {
-          end = current;
-          current = Math.floor((end - start) / 2 + start);
-        } else if (diff < -50) {
-          start = current;
-          current = Math.floor((end - start) / 2 + start);
-        } else {
-          return _objectSpread({}, this.notes[this.refPitch][current], {
-            cents: diff
-          });
-        }
-      }
-
-      return {
-        frequency: null,
-        note: '',
-        cents: null
-      };
-    } // Create a pause event for communication between canvas layers
-
-  }, {
-    key: "toggleAnimation",
-    value: function toggleAnimation() {
-      this.paused = !this.paused;
-      document.dispatchEvent(this.toggleEvent);
-    }
-  }, {
-    key: "numBins",
-    get: function get() {
-      return this.fftSize / 2;
-    }
-  }, {
-    key: "minLog",
-    get: function get() {
-      return Math.log(this.minFreq) / Math.LN10;
-    }
-  }, {
-    key: "logRange",
-    get: function get() {
-      return Math.log(this.maxFreq) / Math.LN10 - this.minLog;
-    }
-  }]);
-
-  return State;
-}();
-
-/* harmony default export */ __webpack_exports__["default"] = (State);
 
 /***/ })
 

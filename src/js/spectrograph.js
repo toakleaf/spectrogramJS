@@ -1,10 +1,10 @@
 import { binSize, getBinInfo } from './audioUtils.js'
 
-export default function(canvas, ctx, state) {
+export default function(canvas, ctx, store) {
   // Clear canvases on resize
   window.addEventListener('resize', () => {
     canvas.width = innerWidth
-    canvas.height = innerHeight - state.canvasOrigin.y
+    canvas.height = innerHeight - store.canvasOrigin.y
     ctx.fillStyle = 'hsl(280, 100%, 10%)'
     ctx.fillRect(0, 0, canvas.width, canvas.height)
   })
@@ -24,24 +24,24 @@ export default function(canvas, ctx, state) {
   let data
   let dataBinInfo
   function init() {
-    analyser.fftSize = parseInt(state.fftSize)
-    analyser.smoothingTimeConstant = state.smoothing
+    analyser.fftSize = parseInt(store.fftSize)
+    analyser.smoothingTimeConstant = store.smoothing
     data = new Uint8Array(analyser.frequencyBinCount)
     dataBinInfo = getBinInfo(
-      state.minFreq,
-      state.maxFreq,
-      state.numBins,
-      binSize(state.numBins, actx.sampleRate)
+      store.minFreq,
+      store.maxFreq,
+      store.numBins,
+      binSize(store.numBins, actx.sampleRate)
     )
   }
   init()
 
-  // Local state for reference outside animation loop
-  let refMaxFreq = state.maxFreq
-  let refMinFreq = state.minFreq
-  let refDisplay = state.display
-  let refNoteGrid = state.noteGrid
-  let refPitch = state.refPitch
+  // Local store for reference outside animation loop
+  let refMaxFreq = store.maxFreq
+  let refMinFreq = store.minFreq
+  let refDisplay = store.display
+  let refNoteGrid = store.noteGrid
+  let refPitch = store.refPitch
   let refTime = Date.now()
   let elapsedTime = 0
   let imageData
@@ -58,29 +58,29 @@ export default function(canvas, ctx, state) {
     ctx.fillRect(0, 0, canvas.width, canvas.height)
     ctx.putImageData(imageData, 0, 1)
 
-    // Reset audio fields when user changes state.
+    // Reset audio fields when user changes store.
     if (
-      analyser.fftSize !== parseInt(state.fftSize) ||
-      analyser.smoothingTimeConstant !== state.smoothing ||
-      refMaxFreq !== state.maxFreq ||
-      refMinFreq !== state.minFreq ||
-      refDisplay !== state.display ||
-      refNoteGrid !== state.noteGrid ||
-      refPitch !== state.refPitch
+      analyser.fftSize !== parseInt(store.fftSize) ||
+      analyser.smoothingTimeConstant !== store.smoothing ||
+      refMaxFreq !== store.maxFreq ||
+      refMinFreq !== store.minFreq ||
+      refDisplay !== store.display ||
+      refNoteGrid !== store.noteGrid ||
+      refPitch !== store.refPitch
     ) {
-      refMaxFreq = state.maxFreq
-      refMinFreq = state.minFreq
-      refDisplay = state.display
-      refNoteGrid = state.noteGrid
-      refPitch = state.refPitch
-      document.dispatchEvent(state.refreshEvent)
+      refMaxFreq = store.maxFreq
+      refMinFreq = store.minFreq
+      refDisplay = store.display
+      refNoteGrid = store.noteGrid
+      refPitch = store.refPitch
+      document.dispatchEvent(store.refreshEvent)
       init()
     }
 
     // Slow down fft refresh rate from default 15-18 ms
     // requestAnimationFrame callback aims for a 60 FPS callback rate but doesn’t guarantee it
     elapsedTime = Date.now() - refTime
-    if (elapsedTime >= state.windowLength) {
+    if (elapsedTime >= store.windowLength) {
       refTime = Date.now()
 
       // Fill up the data array
@@ -99,9 +99,9 @@ export default function(canvas, ctx, state) {
         ctx.strokeStyle = `hsl(${hue}, ${sat}, ${lit}%)`
 
         // Logarithmic Display
-        if (state.display === 'Logarithmic') {
+        if (store.display === 'Logarithmic') {
           ctx.moveTo(prevLogPos, 0)
-          prevLogPos = state.logPositionX(i * dataBinInfo.binSize, canvas.width)
+          prevLogPos = store.logPositionX(i * dataBinInfo.binSize, canvas.width)
           ctx.lineTo(prevLogPos, 0)
         }
         // Linear Display
@@ -137,9 +137,9 @@ export default function(canvas, ctx, state) {
     }
   }
 
-  // Listen for custom toggleAnimation event declared in state.js
+  // Listen for custom toggleAnimation event declared in store.js
   document.addEventListener('toggleAnimation', function(e) {
-    if (state.paused) {
+    if (store.paused) {
       stop()
     } else {
       start()

@@ -1,7 +1,7 @@
-module.exports = function(canvas, ctx, state) {
+module.exports = function(canvas, ctx, store) {
   window.addEventListener('resize', () => {
     canvas.width = innerWidth
-    canvas.height = innerHeight - state.canvasOrigin.y
+    canvas.height = innerHeight - store.canvasOrigin.y
     ctx.clearRect(0, 0, canvas.width, canvas.height)
   })
 
@@ -10,7 +10,7 @@ module.exports = function(canvas, ctx, state) {
     y: canvas.height / 2,
     active: true
   }
-  let freq = state.minFreq
+  let freq = store.minFreq
   let note = null
   let hoveringToggle = false
 
@@ -27,10 +27,10 @@ module.exports = function(canvas, ctx, state) {
     mouse.x = event.clientX
     mouse.y = event.clientY
     if (
-      mouse.x >= state.toggleButton.x &&
-      mouse.x <= state.toggleButton.x + state.toggleButton.width &&
-      mouse.y >= state.toggleButton.y + state.toggleButton.height &&
-      mouse.y <= state.toggleButton.y + state.toggleButton.height * 2
+      mouse.x >= store.toggleButton.x &&
+      mouse.x <= store.toggleButton.x + store.toggleButton.width &&
+      mouse.y >= store.toggleButton.y + store.toggleButton.height &&
+      mouse.y <= store.toggleButton.y + store.toggleButton.height * 2
     ) {
       hoveringToggle = true
       document.body.style.cursor = 'pointer'
@@ -38,15 +38,15 @@ module.exports = function(canvas, ctx, state) {
       hoveringToggle = false
       document.body.style.cursor = 'default'
     }
-    if (state.display !== 'Logarithmic' || !state.pointerNotes) {
-      state.pointerNotes = false
+    if (store.display !== 'Logarithmic' || !store.pointerNotes) {
+      store.pointerNotes = false
       return
     }
-    freq = state.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2)
-    note = state.noteName(freq)
+    freq = store.logFreq(Math.floor(mouse.x), canvas.width).toFixed(2)
+    note = store.noteName(freq)
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     ctx.fillStyle = '#fff'
-    ctx.font = `${state.fontSize}px sans-serif`
+    ctx.font = `${store.fontSize}px sans-serif`
     if (note.note) {
       ctx.fillText(
         `${note.note} : ${note.cents > 0 ? '+' : ''}${note.cents} cents`,
@@ -57,13 +57,13 @@ module.exports = function(canvas, ctx, state) {
     ctx.fillText(
       `${freq.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')} Hz`,
       Math.floor(mouse.x),
-      Math.floor(mouse.y + state.fontSize + 1)
+      Math.floor(mouse.y + store.fontSize + 1)
     )
   })
 
   canvas.addEventListener('click', event => {
     if (hoveringToggle) {
-      state.toggleAnimation()
+      store.toggleAnimation()
     }
   })
 }
