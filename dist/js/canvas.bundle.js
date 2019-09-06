@@ -2807,7 +2807,7 @@ module.exports = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _spectrograph_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./spectrograph.js */ "./src/js/spectrograph.js");
+/* harmony import */ var _spectrogram_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./spectrogram.js */ "./src/js/spectrogram.js");
 /* harmony import */ var _foreground_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./foreground.js */ "./src/js/foreground.js");
 /* harmony import */ var _foreground_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_foreground_js__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _mouse_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./mouse.js */ "./src/js/mouse.js");
@@ -2826,14 +2826,14 @@ start.addEventListener('click', function (event) {
 
   var store = new _Store_js__WEBPACK_IMPORTED_MODULE_3__["default"](); // GUI Setup
 
-  Object(_gui_js__WEBPACK_IMPORTED_MODULE_4__["default"])(store); // Spectrograph Canvas setup
+  Object(_gui_js__WEBPACK_IMPORTED_MODULE_4__["default"])(store); // Spectrogram Canvas setup
 
-  var spectrographCanvas = document.querySelector('canvas#spectrograph');
-  var spectrographCTX = spectrographCanvas.getContext('2d');
-  spectrographCanvas.height = window.innerHeight - store.canvasOrigin.y;
-  spectrographCanvas.width = window.innerWidth;
-  spectrographCTX.fillStyle = 'hsl(280, 100%, 10%)';
-  spectrographCTX.fillRect(0, 0, spectrographCanvas.width, spectrographCanvas.height); // Foreground Canvas setup
+  var spectrogramCanvas = document.querySelector('canvas#spectrogram');
+  var spectrogramCTX = spectrogramCanvas.getContext('2d');
+  spectrogramCanvas.height = window.innerHeight - store.canvasOrigin.y;
+  spectrogramCanvas.width = window.innerWidth;
+  spectrogramCTX.fillStyle = 'hsl(280, 100%, 10%)';
+  spectrogramCTX.fillRect(0, 0, spectrogramCanvas.width, spectrogramCanvas.height); // Foreground Canvas setup
 
   var foregroundCanvas = document.querySelector('canvas#foreground');
   var foregroundCTX = foregroundCanvas.getContext('2d');
@@ -2844,7 +2844,7 @@ start.addEventListener('click', function (event) {
   var mouseCTX = mouseCanvas.getContext('2d');
   mouseCanvas.height = window.innerHeight - store.canvasOrigin.y;
   mouseCanvas.width = window.innerWidth;
-  Object(_spectrograph_js__WEBPACK_IMPORTED_MODULE_0__["default"])(spectrographCanvas, spectrographCTX, store);
+  Object(_spectrogram_js__WEBPACK_IMPORTED_MODULE_0__["default"])(spectrogramCanvas, spectrogramCTX, store);
   _foreground_js__WEBPACK_IMPORTED_MODULE_1___default()(foregroundCanvas, foregroundCTX, store);
   _mouse_js__WEBPACK_IMPORTED_MODULE_2___default()(mouseCanvas, mouseCTX, store);
 });
@@ -5631,10 +5631,10 @@ module.exports = {
 
 /***/ }),
 
-/***/ "./src/js/spectrograph.js":
-/*!********************************!*\
-  !*** ./src/js/spectrograph.js ***!
-  \********************************/
+/***/ "./src/js/spectrogram.js":
+/*!*******************************!*\
+  !*** ./src/js/spectrogram.js ***!
+  \*******************************/
 /*! exports provided: default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
